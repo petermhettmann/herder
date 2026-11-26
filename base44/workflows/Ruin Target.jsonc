@@ -1,0 +1,41 @@
+{
+  "name": "Ruin Target",
+  "description": "When the ruin round starts, the line goes out once.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "CheckIn"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "ruin_target",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "raise_the_line": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/ruin-target",
+            "method": "POST",
+            "body": {
+              "checkInId": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Raise the line",
+            "description": "Only when the next round is the ruin target"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -15,6 +15,9 @@ export const CALL_LABEL = {
   end: "End",
   log_ruin: "Ruin logged",
   hold_then_stop: "Hold, then stop",
+  dead_stop: "Dead stop",
+  re_drive: "Re-drive",
+  swap_to_traditional: "Swap to traditional",
 };
 export const CALL_TEXT = {
   continue: "text-call-go",
@@ -24,6 +27,9 @@ export const CALL_TEXT = {
   end: "text-call-stop",
   log_ruin: "text-call-caution",
   hold_then_stop: "text-call-stop",
+  dead_stop: "text-call-stop",
+  re_drive: "text-call-caution",
+  swap_to_traditional: "text-call-caution",
 };
 export const CALL_DOT = {
   continue: "bg-call-go",
@@ -33,6 +39,9 @@ export const CALL_DOT = {
   end: "bg-call-stop",
   log_ruin: "bg-call-caution",
   hold_then_stop: "bg-call-stop",
+  dead_stop: "bg-call-stop",
+  re_drive: "bg-call-caution",
+  swap_to_traditional: "bg-call-caution",
 };
 
 export function clock(totalSeconds) {

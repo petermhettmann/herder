@@ -28,6 +28,16 @@
       "minimum": 0,
       "description": "Planned build duration in minutes."
     },
+    "ruin_target_round": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "The round the ruin is scheduled for. Unset means no forced ruin is planned."
+    },
+    "forced_ruin_done": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the forced ruin has already been taken this session."
+    },
     "constriction": {
       "type": "string",
       "enum": [

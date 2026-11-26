@@ -34,6 +34,8 @@ export default function CaptureSheet({
   checkIns = [],
   lastCheckIn,
   onSubmitted,
+  now = Date.now(),
+  onForcedRuin,
 }) {
   const runEvaluate = useServerFn(evaluateCheckIn);
   const camera = useBurstCamera(open);
@@ -117,6 +119,47 @@ export default function CaptureSheet({
       onSubmitted(created.id);
     } catch (err) {
       setError(err?.message || "Could not save that check-in.");
+      setBusy(false);
+    }
+  }
+
+  // The ruin can be taken inside the ninety second window a round leaves open.
+  const ruinAnchor = lastCheckIn ? Date.parse(lastCheckIn.created_date) : Date.parse(session?.start_time ?? "");
+  const ruinOpen =
+    Boolean(session) &&
+    !session.forced_ruin_done &&
+    Number.isFinite(ruinAnchor) &&
+    now - ruinAnchor <= 90000;
+
+  async function ruin() {
+    if (!session || !ruinOpen || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const elapsed = Math.floor(elapsedSeconds(session.start_time) / 60);
+      const created = await base44.entities.CheckIn.create({
+        session: session.id,
+        elapsed_min: elapsed,
+        round: (session.rounds_total ?? 0) + 1,
+        ruined: true,
+        forced: true,
+        call_issued: "dead_stop",
+        call_reason: "Forced ruin. Dead stop, one minute.",
+        break_minutes: 1,
+        suction: lastCheckIn?.suction ?? session.start_suction ?? "very_low",
+        cycle: lastCheckIn?.cycle ?? "normal",
+      });
+      await base44.entities.Session.update(session.id, {
+        status: "break",
+        forced_ruin_done: true,
+        rounds_total: (session.rounds_total ?? 0) + 1,
+        breaks_total: (session.breaks_total ?? 0) + 1,
+        peak_elapsed_min: Math.max(session.peak_elapsed_min ?? 0, elapsed),
+        break_ends: [...(session.break_ends ?? []), new Date(Date.now() + 60000).toISOString()],
+      });
+      onForcedRuin?.(created.id);
+    } catch (err) {
+      setError(err?.message || "Could not log that ruin.");
       setBusy(false);
     }
   }
@@ -213,6 +256,22 @@ export default function CaptureSheet({
         >
           {busy ? "Saving..." : "Submit check-in"}
         </Button>
+
+        <button
+          type="button"
+          onClick={ruin}
+          disabled={!ruinOpen || busy}
+          className="mt-3 h-12 w-full rounded-xl border border-border text-[12px] text-call-stop transition-colors disabled:text-muted-foreground/60"
+        >
+          Click — ruin
+        </button>
+        {!ruinOpen && (
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            {session?.forced_ruin_done
+              ? "The ruin is already taken."
+              : "Open in the ninety seconds after a round."}
+          </p>
+        )}
       </SheetContent>
     </Sheet>
   );

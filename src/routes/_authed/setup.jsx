@@ -26,6 +26,10 @@ const CONSTRICTION_OPTIONS = ["traditional", "constriction"].map((value) => ({
   value,
   label: CONSTRICTION_LABEL[value],
 }));
+const RUIN_OPTIONS = ["none", "2", "3", "4", "5"].map((value) => ({
+  value,
+  label: value === "none" ? "None" : value,
+}));
 
 function SetupPage() {
   const navigate = useNavigate();
@@ -34,6 +38,7 @@ function SetupPage() {
   const [constriction, setConstriction] = useState("traditional");
   const [suction, setSuction] = useState("very_low");
   const [buildMin, setBuildMin] = useState(8);
+  const [ruinRound, setRuinRound] = useState("none");
   const [briefing, setBriefing] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -59,6 +64,8 @@ function SetupPage() {
         start_time: new Date().toISOString(),
         plan_type: planType,
         planned_build_min: buildMin,
+        ruin_target_round: ruinRound === "none" ? undefined : Number(ruinRound),
+        forced_ruin_done: false,
         constriction,
         start_suction: suction,
         status: "active",
@@ -123,6 +130,13 @@ function SetupPage() {
                 className="mt-3"
               />
             </div>
+
+            <div>
+              <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Ruin target</Label>
+              <div className="mt-2">
+                <Segmented options={RUIN_OPTIONS} value={ruinRound} onChange={setRuinRound} />
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -159,6 +173,12 @@ function SetupPage() {
                 <span className="text-muted-foreground">Build</span>
                 <span className="tnum">{buildMin} min</span>
               </div>
+              {ruinRound !== "none" && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Ruin target</span>
+                  <span className="tnum">Round {ruinRound}</span>
+                </div>
+              )}
             </>
           )}
         </div>

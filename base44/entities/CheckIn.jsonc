@@ -45,6 +45,11 @@
       "default": false,
       "description": "Whether the edge was ruined. Each ruin takes one off the session target."
     },
+    "forced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the ruin was taken deliberately. A forced ruin implies ruined."
+    },
     "missed_count": {
       "type": "boolean",
       "default": false,
@@ -155,7 +160,10 @@
         "break",
         "end",
         "log_ruin",
-        "hold_then_stop"
+        "hold_then_stop",
+        "dead_stop",
+        "re_drive",
+        "swap_to_traditional"
       ],
       "enumColors": [
         "green",
@@ -164,7 +172,10 @@
         "blue",
         "red",
         "purple",
-        "yellow"
+        "yellow",
+        "red",
+        "yellow",
+        "purple"
       ],
       "description": "The call made at this check-in."
     },

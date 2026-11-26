@@ -94,8 +94,10 @@ function DebriefPage() {
   const elapsed = minutesBetween(session.start_time, session.ended_at);
   const counts = checkIns.reduce((totals, checkIn) => {
     totals.checks += 1;
+    if (checkIn.forced) totals.forced += 1;
+    else if (checkIn.ruined) totals.slipped += 1;
     return totals;
-  }, { checks: 0 });
+  }, { checks: 0, forced: 0, slipped: 0 });
 
   async function save() {
     setState("saving");
@@ -129,6 +131,8 @@ function DebriefPage() {
         <Stat label="Rounds" value={session.rounds_total ?? 0} />
         <Stat label="Breaks" value={session.breaks_total ?? 0} />
         <Stat label="Dry rounds" value={session.dry_rounds ?? 0} />
+        <Stat label="Forced ruins" value={counts.forced} />
+        <Stat label="Slipped ruins" value={counts.slipped} />
         <Stat label="Peak" value={`${session.peak_elapsed_min ?? 0} min`} />
         <Stat label="Projected end" value={session.projected_end_min != null ? `${session.projected_end_min} min` : "—"} />
         <Stat label="Check-ins" value={counts.checks} />

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import BreakOverlay from "@/components/session/BreakOverlay";
 import CaptureSheet from "@/components/session/CaptureSheet";
+import DeadStopOverlay from "@/components/session/DeadStopOverlay";
 import useCheckInSync from "@/hooks/use-checkin-sync";
 import useSessionClock from "@/hooks/use-session-clock";
 import { clearActiveSession, loadActiveSession, saveActiveSession } from "@/lib/active-session";
@@ -155,6 +156,11 @@ function LivePage() {
   }
 
   const breakEnd = session.break_ends?.[session.break_ends.length - 1];
+
+  // The dead stop runs a full minute from the ruin and locks every control until it clears.
+  const forcedRuin = checkIns.find((item) => item.forced) ?? null;
+  const deadStopEnd = forcedRuin ? Date.parse(forcedRuin.created_date) + 60000 : null;
+  const locked = deadStopEnd !== null && now < deadStopEnd;
 
   async function endSession() {
     setEnding(true);
@@ -303,6 +309,18 @@ function LivePage() {
         protocol={protocol}
         checkIns={checkIns}
         lastCheckIn={lastCheckIn}
+        now={now}
+        onForcedRuin={() => {
+          setSheetOpen(false);
+          setPrompt(null);
+          Promise.all([
+            base44.entities.Session.get(sessionId),
+            base44.entities.CheckIn.filter({ session: sessionId }, { sort: "-created_date", limit: 100 }),
+          ]).then(([freshSession, checkInPage]) => {
+            setSession(freshSession);
+            setCheckIns(checkInPage.items ?? []);
+          });
+        }}
         onSubmitted={(checkInId) => {
           setSheetOpen(false);
           setPrompt(null);
@@ -317,7 +335,9 @@ function LivePage() {
         }}
       />
 
-      {session.status === "break" && breakEnd && (
+      {locked && <DeadStopOverlay endsAt={new Date(deadStopEnd).toISOString()} />}
+
+      {!locked && session.status === "break" && breakEnd && (
         <BreakOverlay
           breakEnd={breakEnd}
           pingMinutes={thresholds.break_overrun_ping ?? 3}

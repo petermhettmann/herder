@@ -26,6 +26,17 @@ export async function evaluateCheckInFor(base44, checkInId) {
     unsynced: false,
   });
 
+  const result = {
+    call: verdict.call,
+    reason: verdict.reason,
+    target_suction: verdict.target_suction,
+    target_cycle: verdict.target_cycle,
+    also: verdict.also,
+  };
+
+  // A forced ruin already moved the session when it was taken: only the call is written here.
+  if (checkIn.forced) return { result, sessionId: session.id };
+
   const sessionPatch = {
     rounds_total: roundsAfter,
     breaks_total: (session.breaks_total ?? 0) + (verdict.call === "break" ? 1 : 0),
@@ -48,15 +59,7 @@ export async function evaluateCheckInFor(base44, checkInId) {
 
   await base44.entities.Session.update(session.id, sessionPatch);
 
-  return {
-    result: {
-      call: verdict.call,
-      reason: verdict.reason,
-      target_suction: verdict.target_suction,
-      target_cycle: verdict.target_cycle,
-    },
-    sessionId: session.id,
-  };
+  return { result, sessionId: session.id };
 }
 
 function solveLinearSystem(matrix, vector) {

@@ -93,7 +93,22 @@ export function computeCall({ protocol, session, history = [], draft = {}, now =
   let target = next;
   let breakMinutes = 0;
 
-  if (severity === 3 && elapsed > (thresholds.end_hard_min ?? 150)) {
+  // A forced ruin owns the call, and the next check-in inside two minutes of one is a re-drive.
+  const forcedGapMs = previous?.forced ? now - Date.parse(previous.created_date ?? "") : Number.POSITIVE_INFINITY;
+  const swapToTraditional = Boolean(entry.forced) && session?.constriction === "constriction";
+
+  if (entry.forced) {
+    call = "dead_stop";
+    breakMinutes = 1;
+    reason = swapToTraditional
+      ? "Forced ruin. Dead stop, one minute. Swap to traditional."
+      : "Forced ruin. Dead stop, one minute.";
+    target = keep;
+  } else if (forcedGapMs >= 0 && forcedGapMs <= 120000) {
+    call = "re_drive";
+    reason = `Forced ruin ${Math.round(forcedGapMs / 1000)} s ago. Re-drive at suction 1, cycle 3.`;
+    target = { suction: "off", cycle: "fast" };
+  } else if (severity === 3 && elapsed > (thresholds.end_hard_min ?? 150)) {
     call = "end";
     reason = `Severity 3 at ${elapsed} min, past the ${thresholds.end_hard_min ?? 150} min hard limit.`;
     target = keep;
@@ -152,6 +167,7 @@ export function computeCall({ protocol, session, history = [], draft = {}, now =
     target_suction: target.suction,
     target_cycle: target.cycle,
     break_minutes: breakMinutes,
+    also: swapToTraditional ? "swap_to_traditional" : null,
     severity,
     elapsed,
     round,
