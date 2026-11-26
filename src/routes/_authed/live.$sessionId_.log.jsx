@@ -59,7 +59,9 @@ function LogPage() {
                   </span>
                   <span className={`text-[13px] font-medium ${CALL_TEXT[call]}`}>{CALL_LABEL[call]}</span>
                   <span className="tnum ml-auto text-[11px] text-muted-foreground">
-                    sev {checkIn.effective_severity ?? 0}
+                    {checkIn.edge_index
+                      ? `edge ${checkIn.edge_index}`
+                      : `sev ${checkIn.effective_severity ?? 0}`}
                   </span>
                   <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" strokeWidth={1.75} aria-hidden="true" />
                 </CollapsibleTrigger>
@@ -72,6 +74,9 @@ function LogPage() {
                     {checkIn.closeness != null && <span>closeness {checkIn.closeness}</span>}
                     {checkIn.suction && <span>{SUCTION_LABEL[checkIn.suction]}</span>}
                     {checkIn.cycle && <span>{CYCLE_LABEL[checkIn.cycle]}</span>}
+                    {checkIn.wand_intensity && <span>wand {checkIn.wand_intensity}</span>}
+                    {checkIn.ruined && <span>ruined</span>}
+                    {checkIn.missed_count && <span>count missed</span>}
                     {checkIn.break_minutes > 0 && <span>break {checkIn.break_minutes}m</span>}
                     {checkIn.is_dry && <span>dry</span>}
                   </div>

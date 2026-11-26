@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Camera, RotateCcw } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { evaluateCheckIn } from "@/lib/checkins";
 import { cn } from "@/lib/utils";
@@ -9,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import BurstCamera from "@/components/session/BurstCamera";
 import Stepper from "@/components/session/Stepper";
 import VoiceNote from "@/components/session/VoiceNote";
 import useBurstCamera from "@/components/session/useBurstCamera";
@@ -129,49 +129,9 @@ export default function CaptureSheet({
           <p className="text-[12px] text-muted-foreground">Three shots, then how it feels.</p>
         </SheetHeader>
 
-        <div className="relative mt-4 overflow-hidden rounded-xl border border-border bg-secondary">
-          <video ref={camera.videoRef} autoPlay muted playsInline className="aspect-[4/3] w-full object-cover" />
-          {!camera.ready && (
-            <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-[11px] text-muted-foreground">
-              {camera.error || "Starting camera..."}
-            </div>
-          )}
+        <div className="mt-4">
+          <BurstCamera camera={camera} />
         </div>
-
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          {camera.slots.map((slot, index) => (
-            <div key={index} className="relative overflow-hidden rounded-lg border border-border bg-secondary">
-              {slot ? (
-                <>
-                  <img src={slot.url} alt={`Shot ${index + 1}`} className="aspect-square w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => camera.retake(index)}
-                    className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-background/85 py-1 text-[11px] text-foreground"
-                  >
-                    <RotateCcw className="h-3 w-3" strokeWidth={1.75} aria-hidden="true" />
-                    Retake
-                  </button>
-                </>
-              ) : (
-                <div className="tnum flex aspect-square items-center justify-center text-[11px] text-muted-foreground">
-                  {index + 1}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          onClick={camera.fireBurst}
-          disabled={!camera.ready || camera.firing}
-          className="mt-3 h-11 w-full rounded-xl text-[12px]"
-        >
-          <Camera className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
-          {camera.firing ? "Firing..." : "Take 3 shots, 1s apart"}
-        </Button>
 
         <div className="mt-6 space-y-2">
           {CONDITIONS.map((value) => (

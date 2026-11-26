@@ -21,6 +21,24 @@
       "description": "Call thresholds: when to continue, hold, drop, break or end.",
       "additionalProperties": true
     },
+    "denial_target": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 7,
+      "description": "Edges a denial session runs to before hold, then stop."
+    },
+    "denial_cap_min": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 30,
+      "description": "Elapsed minutes at which a denial session stops."
+    },
+    "denial_missed_count_penalty_sec": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 30,
+      "description": "Seconds added to the hold after an edge whose count was missed."
+    },
     "active": {
       "type": "boolean",
       "default": true,

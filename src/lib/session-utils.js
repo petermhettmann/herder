@@ -4,16 +4,26 @@ export const CYCLE_LEVELS = ["slow", "normal", "fast"];
 export const CYCLE_LABEL = { slow: "Slow", normal: "Normal", fast: "Fast" };
 export const CONDITIONS = ["fine", "puffy", "tight_numb", "raw"];
 export const CONDITION_LABEL = { fine: "Fine", puffy: "Puffy", tight_numb: "Tight / numb", raw: "Raw" };
-export const PLAN_LABEL = { full: "Full", forced: "Forced", payoff: "Payoff" };
+export const PLAN_LABEL = { full: "Full", forced: "Forced", payoff: "Payoff", denial: "Denial" };
 export const CONSTRICTION_LABEL = { traditional: "Traditional", constriction: "Constriction" };
 export const STATUS_LABEL = { planned: "Planned", active: "Active", break: "On break", ended: "Ended" };
-export const CALL_LABEL = { continue: "Continue", hold: "Hold", drop: "Drop", break: "Break", end: "End" };
+export const CALL_LABEL = {
+  continue: "Continue",
+  hold: "Hold",
+  drop: "Drop",
+  break: "Break",
+  end: "End",
+  log_ruin: "Ruin logged",
+  hold_then_stop: "Hold, then stop",
+};
 export const CALL_TEXT = {
   continue: "text-call-go",
   hold: "text-call-caution",
   drop: "text-call-caution",
   break: "text-call-stop",
   end: "text-call-stop",
+  log_ruin: "text-call-caution",
+  hold_then_stop: "text-call-stop",
 };
 export const CALL_DOT = {
   continue: "bg-call-go",
@@ -21,6 +31,8 @@ export const CALL_DOT = {
   drop: "bg-call-caution",
   break: "bg-call-stop",
   end: "bg-call-stop",
+  log_ruin: "bg-call-caution",
+  hold_then_stop: "bg-call-stop",
 };
 
 export function clock(totalSeconds) {

@@ -12,12 +12,14 @@
       "enum": [
         "full",
         "forced",
-        "payoff"
+        "payoff",
+        "denial"
       ],
       "enumColors": [
         "blue",
         "purple",
-        "green"
+        "green",
+        "pink"
       ],
       "description": "Which plan the session follows."
     },

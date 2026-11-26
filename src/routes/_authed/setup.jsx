@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authed/setup")({
   component: SetupPage,
 });
 
-const PLAN_OPTIONS = ["full", "forced", "payoff"].map((value) => ({ value, label: PLAN_LABEL[value] }));
+const PLAN_OPTIONS = ["full", "forced", "payoff", "denial"].map((value) => ({ value, label: PLAN_LABEL[value] }));
 const CONSTRICTION_OPTIONS = ["traditional", "constriction"].map((value) => ({
   value,
   label: CONSTRICTION_LABEL[value],
@@ -29,6 +29,7 @@ const CONSTRICTION_OPTIONS = ["traditional", "constriction"].map((value) => ({
 
 function SetupPage() {
   const navigate = useNavigate();
+  const [protocol, setProtocol] = useState(null);
   const [planType, setPlanType] = useState("full");
   const [constriction, setConstriction] = useState("traditional");
   const [suction, setSuction] = useState("very_low");
@@ -41,6 +42,7 @@ function SetupPage() {
     base44.entities.Protocol.filter({ active: true }, { limit: 1 })
       .then((page) => {
         const active = (page.items ?? [])[0];
+        setProtocol(active ?? null);
         const warmup = active?.plan_tables?.full?.warmup;
         if (warmup?.suction) setSuction(warmup.suction);
         if (warmup?.end_min) setBuildMin(Number(warmup.end_min));
@@ -66,7 +68,10 @@ function SetupPage() {
         peak_elapsed_min: 0,
         briefing: briefing || undefined,
       });
-      navigate({ to: "/live/$sessionId", params: { sessionId: created.id } });
+      navigate({
+        to: planType === "denial" ? "/live/$sessionId/denial" : "/live/$sessionId",
+        params: { sessionId: created.id },
+      });
     } catch (err) {
       setError(err?.message || "Could not start the session.");
       setBusy(false);
@@ -88,34 +93,38 @@ function SetupPage() {
           </div>
         </div>
 
-        <div>
-          <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Constriction</Label>
-          <div className="mt-2">
-            <Segmented options={CONSTRICTION_OPTIONS} value={constriction} onChange={setConstriction} />
-          </div>
-        </div>
+        {planType !== "denial" && (
+          <>
+            <div>
+              <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Constriction</Label>
+              <div className="mt-2">
+                <Segmented options={CONSTRICTION_OPTIONS} value={constriction} onChange={setConstriction} />
+              </div>
+            </div>
 
-        <Stepper
-          label="Start suction"
-          display={SUCTION_LABEL[suction]}
-          onDecrease={() => setSuction(step(SUCTION_LEVELS, suction, -1))}
-          onIncrease={() => setSuction(step(SUCTION_LEVELS, suction, 1))}
-        />
+            <Stepper
+              label="Start suction"
+              display={SUCTION_LABEL[suction]}
+              onDecrease={() => setSuction(step(SUCTION_LEVELS, suction, -1))}
+              onIncrease={() => setSuction(step(SUCTION_LEVELS, suction, 1))}
+            />
 
-        <div>
-          <div className="flex items-baseline justify-between">
-            <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Planned build</Label>
-            <span className="tnum text-[13px] font-medium">{buildMin} min</span>
-          </div>
-          <Slider
-            value={[buildMin]}
-            min={0}
-            max={120}
-            step={5}
-            onValueChange={([value]) => setBuildMin(value)}
-            className="mt-3"
-          />
-        </div>
+            <div>
+              <div className="flex items-baseline justify-between">
+                <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Planned build</Label>
+                <span className="tnum text-[13px] font-medium">{buildMin} min</span>
+              </div>
+              <Slider
+                value={[buildMin]}
+                min={0}
+                max={120}
+                step={5}
+                onValueChange={([value]) => setBuildMin(value)}
+                className="mt-3"
+              />
+            </div>
+          </>
+        )}
       </div>
 
       <div className="mt-8 rounded-xl border border-border p-4">
@@ -125,18 +134,33 @@ function SetupPage() {
             <span className="text-muted-foreground">Plan</span>
             <span>{PLAN_LABEL[planType]}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Constriction</span>
-            <span>{CONSTRICTION_LABEL[constriction]}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Start suction</span>
-            <span>{SUCTION_LABEL[suction]}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Build</span>
-            <span className="tnum">{buildMin} min</span>
-          </div>
+          {planType === "denial" ? (
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Target</span>
+                <span className="tnum">{protocol?.denial_target ?? 7} edges</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Cap</span>
+                <span className="tnum">{protocol?.denial_cap_min ?? 30} min</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Constriction</span>
+                <span>{CONSTRICTION_LABEL[constriction]}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Start suction</span>
+                <span>{SUCTION_LABEL[suction]}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Build</span>
+                <span className="tnum">{buildMin} min</span>
+              </div>
+            </>
+          )}
         </div>
 
         <Textarea

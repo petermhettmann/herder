@@ -17,6 +17,39 @@
       "minimum": 0,
       "description": "Round number at this check-in."
     },
+    "edge_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Edge number within a denial session, counted from the previous edge."
+    },
+    "wand_intensity": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "enumColors": [
+        "blue",
+        "blue",
+        "green",
+        "yellow",
+        "red"
+      ],
+      "description": "Wand intensity used at this edge, 1 to 5."
+    },
+    "ruined": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the edge was ruined. Each ruin takes one off the session target."
+    },
+    "missed_count": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the count was missed on this edge. The next edge holds longer."
+    },
     "suction": {
       "type": "string",
       "enum": [
@@ -120,14 +153,18 @@
         "hold",
         "drop",
         "break",
-        "end"
+        "end",
+        "log_ruin",
+        "hold_then_stop"
       ],
       "enumColors": [
         "green",
         "yellow",
         "yellow",
         "blue",
-        "red"
+        "red",
+        "purple",
+        "yellow"
       ],
       "description": "The call made at this check-in."
     },

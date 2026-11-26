@@ -50,7 +50,7 @@ function HomePage() {
 
       {open && (
         <Link
-          to="/live/$sessionId"
+          to={open.plan_type === "denial" ? "/live/$sessionId/denial" : "/live/$sessionId"}
           params={{ sessionId: open.id }}
           className="mt-6 block rounded-xl border border-border p-4 transition-colors hover:bg-secondary"
         >
