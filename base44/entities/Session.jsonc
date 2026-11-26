@@ -146,6 +146,26 @@
       ],
       "default": "unknown",
       "description": "Head condition the next day."
+    },
+    "follow_up_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the eighteen hour follow-up has already been raised for this session."
+    },
+    "stats": {
+      "type": "object",
+      "description": "Computed at the end of the session: elapsed, check-ins, rounds, breaks, first break, max severity, average round gap.",
+      "additionalProperties": true
+    },
+    "analysis": {
+      "type": "string",
+      "format": "textarea",
+      "description": "Cross-session reading of break triggers and the plateau trend, written after the debrief is saved."
+    },
+    "analysis_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the cross-session analysis was last written."
     }
   },
   "required": [

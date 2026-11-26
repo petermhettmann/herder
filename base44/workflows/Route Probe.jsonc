@@ -1,0 +1,45 @@
+{
+  "name": "Route Probe",
+  "description": "Temporary probe: can the workflow runner reach an app server route.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "one_time",
+      "cron_expression": null,
+      "one_time_date": "2026-11-26T13:16:00Z",
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "route_probe",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "probe_route": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/agent/evaluate-checkin",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Probe the route"
+          }
+        }
+      }
+    ]
+  }
+}

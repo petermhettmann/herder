@@ -1,0 +1,41 @@
+{
+  "name": "Session Briefing",
+  "description": "When a session is created, the briefing card is written from the protocol before the first round.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Session"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "session_briefing",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "write_briefing": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/briefing",
+            "method": "POST",
+            "body": {
+              "sessionId": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Write the briefing",
+            "description": "Protocol to briefing card"
+          }
+        }
+      }
+    ]
+  }
+}

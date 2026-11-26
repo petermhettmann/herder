@@ -1,0 +1,96 @@
+{
+  "name": "Silence Check-In",
+  "description": "An active session with ten minutes of silence gets a check-in prompt.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/5 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "silence_check_in",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan_silence": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/silence",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "short_wait",
+          "x-base44": {
+            "title": "Prompt the silent session",
+            "description": "Ten minutes without a check-in"
+          }
+        }
+      },
+      {
+        "short_wait": {
+          "wait": "PT2M",
+          "then": "scan_again",
+          "x-base44": {
+            "title": "Wait two minutes",
+            "description": "Tighten the ten minute edge"
+          }
+        }
+      },
+      {
+        "scan_again": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/silence",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "second_wait",
+          "x-base44": {
+            "title": "Check the silence again",
+            "description": "Prompt if the window closed"
+          }
+        }
+      },
+      {
+        "second_wait": {
+          "wait": "PT2M",
+          "then": "scan_last",
+          "x-base44": {
+            "title": "Wait two minutes",
+            "description": "Second pass"
+          }
+        }
+      },
+      {
+        "scan_last": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/silence",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Last look at the silence",
+            "description": "Prompt if still silent"
+          }
+        }
+      }
+    ]
+  }
+}

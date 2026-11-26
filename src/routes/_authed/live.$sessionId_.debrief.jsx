@@ -5,7 +5,9 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PLAN_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
+import { CONDITION_LABEL, PLAN_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
+
+const HEAD_OPTIONS = ["fine", "puffy", "tight_numb", "raw"];
 
 export const Route = createFileRoute("/_authed/live/$sessionId_/debrief")({
   ssr: false,
@@ -32,6 +34,7 @@ function DebriefPage() {
   const [turned, setTurned] = useState("");
   const [change, setChange] = useState("");
   const [repeat, setRepeat] = useState(0);
+  const [head, setHead] = useState("unknown");
   const [state, setState] = useState("idle");
 
   useEffect(() => {
@@ -45,8 +48,24 @@ function DebriefPage() {
       setTurned(loadedSession.where_turned ?? "");
       setChange(loadedSession.would_change ?? "");
       setRepeat(loadedSession.would_repeat ?? 0);
+      setHead(loadedSession.head_next_day ?? "unknown");
     });
   }, [sessionId]);
+
+  // The cross-session reading is written after the save lands; pick it up without a reload.
+  useEffect(() => {
+    if (state !== "saved" || session?.analysis) return;
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      if (tries > 15) {
+        clearInterval(timer);
+        return;
+      }
+      base44.entities.Session.get(sessionId).then(setSession);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, [state, session?.analysis, sessionId]);
 
   if (!session) {
     return <div className="h-40 animate-pulse rounded-xl border border-border" aria-hidden="true" />;
@@ -86,6 +105,7 @@ function DebriefPage() {
         where_turned: turned || undefined,
         would_change: change || undefined,
         would_repeat: repeat || undefined,
+        head_next_day: head,
       });
       setState("saved");
     } catch {
@@ -112,6 +132,19 @@ function DebriefPage() {
         <Stat label="Peak" value={`${session.peak_elapsed_min ?? 0} min`} />
         <Stat label="Projected end" value={session.projected_end_min != null ? `${session.projected_end_min} min` : "—"} />
         <Stat label="Check-ins" value={counts.checks} />
+        {session.stats && (
+          <>
+            <Stat
+              label="First break"
+              value={session.stats.first_break_min != null ? `${session.stats.first_break_min} min` : "none"}
+            />
+            <Stat label="Highest severity" value={session.stats.max_severity ?? 0} />
+            <Stat
+              label="Average round gap"
+              value={session.stats.avg_round_gap_min != null ? `${session.stats.avg_round_gap_min} min` : "—"}
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-7 space-y-5">
@@ -146,7 +179,34 @@ function DebriefPage() {
             ))}
           </div>
         </div>
+
+        <div>
+          <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Head next day</Label>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {HEAD_OPTIONS.map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setHead(value)}
+                className={`h-11 rounded-xl border text-[12px] transition-colors ${
+                  head === value
+                    ? "border-primary bg-primary/10 font-medium text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {CONDITION_LABEL[value]}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {session.analysis && (
+        <div className="mt-7 rounded-xl border border-border p-4">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">What the record shows</p>
+          <p className="mt-2 whitespace-pre-line text-[12px] leading-relaxed">{session.analysis}</p>
+        </div>
+      )}
 
       {state === "error" && <p className="mt-4 text-[11px] text-call-stop">Could not save the debrief.</p>}
 

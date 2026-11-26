@@ -1,0 +1,97 @@
+{
+  "name": "Prompt",
+  "type": "object",
+  "properties": {
+    "session": {
+      "type": "string",
+      "format": "relation",
+      "description": "Session this prompt belongs to."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "silence",
+        "round",
+        "resume",
+        "followup"
+      ],
+      "enumColors": [
+        "yellow",
+        "blue",
+        "green",
+        "purple"
+      ],
+      "description": "What raised the prompt: a silence window, a logged round, a finished break, or the next-day follow-up."
+    },
+    "text": {
+      "type": "string",
+      "format": "textarea",
+      "description": "The prompt as it is delivered, in the protocol voice."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "done"
+      ],
+      "enumColors": [
+        "yellow",
+        "gray"
+      ],
+      "default": "pending",
+      "description": "Pending until a check-in answers it or it is dismissed."
+    },
+    "due_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the prompt became due; refreshed when a prompt repeats."
+    }
+  },
+  "required": [
+    "session",
+    "kind",
+    "text",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

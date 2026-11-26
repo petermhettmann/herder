@@ -1,0 +1,96 @@
+{
+  "name": "Break Resume",
+  "description": "A break that has run out gets a resume prompt, repeated every three minutes while it goes unanswered.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/5 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "break_resume",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan_breaks": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/break-resume",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "first_wait",
+          "x-base44": {
+            "title": "Prompt the finished break",
+            "description": "Break has run out"
+          }
+        }
+      },
+      {
+        "first_wait": {
+          "wait": "PT3M",
+          "then": "repeat_once",
+          "x-base44": {
+            "title": "Wait three minutes",
+            "description": "Silence after the resume call"
+          }
+        }
+      },
+      {
+        "repeat_once": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/break-resume",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "second_wait",
+          "x-base44": {
+            "title": "Repeat the resume call",
+            "description": "Only if unanswered"
+          }
+        }
+      },
+      {
+        "second_wait": {
+          "wait": "PT3M",
+          "then": "repeat_twice",
+          "x-base44": {
+            "title": "Wait three minutes",
+            "description": "Second silence"
+          }
+        }
+      },
+      {
+        "repeat_twice": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/break-resume",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Repeat once more",
+            "description": "Only if unanswered"
+          }
+        }
+      }
+    ]
+  }
+}

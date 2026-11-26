@@ -49,6 +49,7 @@ function LivePage() {
   const [session, setSession] = useState(null);
   const [protocol, setProtocol] = useState(null);
   const [checkIns, setCheckIns] = useState([]);
+  const [prompt, setPrompt] = useState(null);
   const [now, setNow] = useState(() => Date.now());
   const [sheetOpen, setSheetOpen] = useState(false);
   const [ending, setEnding] = useState(false);
@@ -61,12 +62,14 @@ function LivePage() {
       base44.entities.Session.get(sessionId),
       base44.entities.Protocol.filter({ active: true }, { limit: 1 }),
       base44.entities.CheckIn.filter({ session: sessionId }, { sort: "-created_date", limit: 100 }),
+      base44.entities.Prompt.filter({ session: sessionId, status: "pending" }, { sort: "-created_date", limit: 1 }),
     ])
-      .then(([loadedSession, protocolPage, checkInPage]) => {
+      .then(([loadedSession, protocolPage, checkInPage, promptPage]) => {
         if (cancelled) return;
         setSession(loadedSession);
         setProtocol((protocolPage.items ?? [])[0] ?? null);
         setCheckIns(checkInPage.items ?? []);
+        setPrompt((promptPage.items ?? [])[0] ?? null);
       })
       .catch((err) => setError(err?.message || "Could not load that session."));
     return () => {
@@ -78,6 +81,16 @@ function LivePage() {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // The workflows raise prompts while the screen is open; show the newest one as it lands.
+  useEffect(() => {
+    const unsubscribe = base44.entities.Prompt.subscribe((event) => {
+      if (event?.data?.session !== sessionId) return;
+      base44.entities.Prompt.filter({ session: sessionId, status: "pending" }, { sort: "-created_date", limit: 1 })
+        .then((page) => setPrompt((page.items ?? [])[0] ?? null));
+    });
+    return unsubscribe;
+  }, [sessionId]);
 
   if (!session) {
     return (
@@ -191,6 +204,13 @@ function LivePage() {
         </p>
       </div>
 
+      {prompt && !ended && (
+        <div className="mt-3 rounded-xl border border-call-caution/60 p-4">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-call-caution">Mistress</p>
+          <p className="mt-1 text-[13px] leading-relaxed">{prompt.text}</p>
+        </div>
+      )}
+
       {ended ? (
         <Button
           type="button"
@@ -207,6 +227,13 @@ function LivePage() {
         >
           Check in
         </Button>
+      )}
+
+      {session.briefing && (
+        <div className="mt-3 rounded-xl border border-border p-4">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Briefing</p>
+          <p className="mt-2 whitespace-pre-line text-[12px] leading-relaxed">{session.briefing}</p>
+        </div>
       )}
 
       {error && <p className="mt-3 text-[11px] text-call-stop">{error}</p>}
@@ -245,6 +272,11 @@ function LivePage() {
         lastCheckIn={lastCheckIn}
         onSubmitted={(checkInId) => {
           setSheetOpen(false);
+          setPrompt(null);
+          base44.entities.Prompt.updateMany(
+            { session: sessionId, status: "pending" },
+            { $set: { status: "done" } },
+          );
           navigate({
             to: "/live/$sessionId/verdict/$checkInId",
             params: { sessionId, checkInId },
