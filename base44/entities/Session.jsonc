@@ -64,6 +64,14 @@
       "format": "date-time",
       "description": "When the session ended."
     },
+    "break_ends": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "description": "When each break taken in this session ends; the last entry is the current one."
+    },
     "rounds_total": {
       "type": "integer",
       "minimum": 0,
