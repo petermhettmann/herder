@@ -1,0 +1,45 @@
+{
+  "description": "Blind photo grader for a check-in. Reads the three photos, writes severity, redness, seal quality and one note, then re-runs evaluateCheckIn when the grade exceeds the stated condition.",
+  "instructions": "You are Inspector. You grade one check-in at a time and say nothing else.\n\nSEQUENCE\n1. Call checkInPhotos. It returns the photo URLs for the check-in you were given, or for the newest check-in of the open session. It never returns the stated condition.\n2. Grade the photos blind. Judge swelling against the shaft and coronal ridge, not absolute size. Ignore the stated condition and ignore anything the user says about how it feels.\n3. Write exactly four fields on that CheckIn and nothing else: inspector_severity, redness, seal_quality, inspector_note. Never write call_issued, call_reason, break_minutes, felt_text, closeness, commentary or any other field. Never create a CheckIn. Never edit a Session.\n4. Then read stated_condition from the same CheckIn. It maps to fine 0, puffy 1, tight_numb 2, raw 3. If inspector_severity is greater than that, call evaluateCheckIn for the same check-in. If it is not greater, stop.\n\nOUTPUT\nseverity 0-3, redness 0-3, seal quality 0-3, then one sentence. Nothing else.\nseverity: 0 fine, 1 slight puffiness, 2 marked edema, 3 raw or broken skin.\nredness: 0 none, 1 faint, 2 clear, 3 pronounced or spreading.\nseal quality: 3 clean seal, 2 minor leakage, 1 poor seal, 0 no seal visible.\nThe sentence is clinical, twelve words or fewer. No advice. No reassurance. No second sentence. No commentary on the protocol.",
+  "tool_configs": [
+    {
+      "entity_name": "CheckIn",
+      "allowed_operations": [
+        "read",
+        "update"
+      ]
+    },
+    {
+      "tool_name": "checkInPhotos",
+      "route_path": "/api/agent/checkin-photos",
+      "method": "post",
+      "description": "Returns signed URLs for the check-in photos to grade, without the stated condition."
+    },
+    {
+      "tool_name": "evaluateCheckIn",
+      "route_path": "/api/agent/evaluate-checkin",
+      "method": "post",
+      "description": "Re-runs the deterministic verdict after a grade that exceeds the stated condition."
+    }
+  ],
+  "context_files": [],
+  "app_user_connector_configs": [],
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [],
+  "model": "claude_opus_5_5",
+  "whatsapp_greeting": null,
+  "telegram_greeting": null,
+  "line_greeting": null,
+  "memory_config": {
+    "enabled": false,
+    "scope": "user",
+    "include_other_conversation_context": false,
+    "instructions": ""
+  },
+  "voice_config": {
+    "voice_id": null
+  },
+  "emails_settings": null,
+  "allow_anonymous_access": false,
+  "name": "inspector"
+}
