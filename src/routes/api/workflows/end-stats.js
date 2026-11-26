@@ -56,6 +56,11 @@ export const Route = createFileRoute("/api/workflows/end-stats")({
           ...(session.ended_at ? {} : { ended_at: endedAt }),
           stats,
         });
+        // Nothing is due once the session is over.
+        await base44.entities.Prompt.updateMany(
+          { session: session.id, status: "pending" },
+          { $set: { status: "done" } },
+        );
 
         return Response.json({ session: session.id, stats });
       },

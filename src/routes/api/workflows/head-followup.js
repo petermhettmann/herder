@@ -24,17 +24,22 @@ export const Route = createFileRoute("/api/workflows/head-followup")({
           if (!Number.isFinite(endedMs) || Date.now() - endedMs < FOLLOW_UP_AFTER_MS) continue;
 
           const answered = session.head_next_day && session.head_next_day !== "unknown";
-          if (!answered) {
-            const outcome = await raisePrompt(
-              base44,
-              session,
-              "followup",
-              "Eighteen hours since the end. Report head condition now: fine, puffy, tight and numb, or raw.",
-            );
-            results.push({ session: session.id, outcome });
+          if (answered) {
+            await base44.entities.Session.update(session.id, { follow_up_sent: true });
+            continue;
           }
 
-          await base44.entities.Session.update(session.id, { follow_up_sent: true });
+          const outcome = await raisePrompt(
+            base44,
+            session,
+            "followup",
+            "Eighteen hours since the end. Report head condition now: fine, puffy, tight and numb, or raw.",
+          );
+          // A prompt still pending from the session holds this one for the next hourly pass.
+          if (outcome === "raised" || outcome === "repeated") {
+            await base44.entities.Session.update(session.id, { follow_up_sent: true });
+          }
+          results.push({ session: session.id, outcome });
         }
 
         return Response.json({ checked: (page.items ?? []).length, prompts: results });
