@@ -1,0 +1,59 @@
+{
+  "name": "Route Probe 2",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "route_probe_2",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "probe_agent": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/agent/pending-prompts",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "probe_workflows",
+          "x-base44": {
+            "title": "Probe agent route"
+          }
+        }
+      },
+      {
+        "probe_workflows": {
+          "call": "invoke_server_route",
+          "with": {
+            "path": "/api/workflows/silence",
+            "method": "POST",
+            "body": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Probe workflow route"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Temporary probe: which new routes the workflow runner can reach.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "one_time",
+      "cron_expression": null,
+      "one_time_date": "2026-11-26T13:22:30Z",
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
