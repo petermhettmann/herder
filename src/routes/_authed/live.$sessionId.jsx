@@ -15,13 +15,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import BreakOverlay from "@/components/session/BreakOverlay";
 import CaptureSheet from "@/components/session/CaptureSheet";
+import useCheckInSync from "@/hooks/use-checkin-sync";
+import useSessionClock from "@/hooks/use-session-clock";
+import { clearActiveSession, loadActiveSession, saveActiveSession } from "@/lib/active-session";
 import {
   CONSTRICTION_LABEL,
   CYCLE_LABEL,
   PLAN_LABEL,
   SUCTION_LABEL,
   clock,
-  elapsedSeconds,
   phaseInfo,
 } from "@/lib/session-utils";
 
@@ -50,7 +52,7 @@ function LivePage() {
   const [protocol, setProtocol] = useState(null);
   const [checkIns, setCheckIns] = useState([]);
   const [prompt, setPrompt] = useState(null);
-  const [now, setNow] = useState(() => Date.now());
+  const [restored, setRestored] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [ending, setEnding] = useState(false);
   const [resuming, setResuming] = useState(false);
@@ -77,10 +79,25 @@ function LivePage() {
     };
   }, [sessionId]);
 
+  // The running session is remembered on the device, so a reload restores the timer
+  // before the record is fetched.
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+    const saved = loadActiveSession();
+    if (saved?.id === sessionId) setRestored(saved);
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!session) return;
+    if (session.status === "ended") clearActiveSession();
+    else saveActiveSession(session);
+  }, [session]);
+
+  const startTime = session?.start_time ?? restored?.start_time ?? null;
+  const endedAt = session?.status === "ended" ? session.ended_at : null;
+  const { now, seconds } = useSessionClock(startTime, endedAt);
+
+  // A call decided on the device confirms itself when the connection is back.
+  useCheckInSync(sessionId);
 
   // The workflows raise prompts while the screen is open; show the newest one as it lands.
   useEffect(() => {
@@ -93,18 +110,25 @@ function LivePage() {
   }, [sessionId]);
 
   if (!session) {
+    if (!restored) {
+      return (
+        <div className="space-y-3" aria-hidden="true">
+          <div className="h-3 w-24 rounded-sm bg-secondary" />
+          <div className="h-10 w-40 rounded-sm bg-secondary" />
+          <div className="mt-6 h-32 rounded-xl border border-border" />
+        </div>
+      );
+    }
     return (
-      <div className="space-y-3" aria-hidden="true">
-        <div className="h-3 w-24 rounded-sm bg-secondary" />
-        <div className="h-10 w-40 rounded-sm bg-secondary" />
-        <div className="mt-6 h-32 rounded-xl border border-border" />
+      <div className="animate-fade-up pb-4">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Restoring session</p>
+        <p className="tnum mt-2 text-[40px] font-medium leading-none tracking-[-0.02em]">{clock(seconds)}</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">Elapsed</p>
       </div>
     );
   }
 
   const ended = session.status === "ended";
-  const reference = ended && session.ended_at ? Date.parse(session.ended_at) : now;
-  const seconds = elapsedSeconds(session.start_time, reference);
   const elapsedMin = Math.floor(seconds / 60);
   const plan = protocol?.plan_tables?.[session.plan_type] ?? null;
   const phase = phaseInfo(plan, elapsedMin);
@@ -269,6 +293,8 @@ function LivePage() {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         session={session}
+        protocol={protocol}
+        checkIns={checkIns}
         lastCheckIn={lastCheckIn}
         onSubmitted={(checkInId) => {
           setSheetOpen(false);

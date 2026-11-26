@@ -12,7 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 import Stepper from "@/components/session/Stepper";
 import VoiceNote from "@/components/session/VoiceNote";
 import useBurstCamera from "@/components/session/useBurstCamera";
+import { computeCall } from "@/lib/verdict";
 import {
+  CALL_LABEL,
+  CALL_TEXT,
   CONDITIONS,
   CONDITION_LABEL,
   CYCLE_LABEL,
@@ -23,7 +26,15 @@ import {
   step,
 } from "@/lib/session-utils";
 
-export default function CaptureSheet({ open, onOpenChange, session, lastCheckIn, onSubmitted }) {
+export default function CaptureSheet({
+  open,
+  onOpenChange,
+  session,
+  protocol,
+  checkIns = [],
+  lastCheckIn,
+  onSubmitted,
+}) {
   const runEvaluate = useServerFn(evaluateCheckIn);
   const camera = useBurstCamera(open);
   const [condition, setCondition] = useState("");
@@ -45,11 +56,27 @@ export default function CaptureSheet({ open, onOpenChange, session, lastCheckIn,
     camera.reset();
   }, [open, lastCheckIn?.id, session?.start_suction, camera.reset]);
 
+  // The call for what is picked, decided here with the same table the server uses.
+  const preview = session && condition
+    ? computeCall({
+        protocol,
+        session,
+        history: checkIns,
+        draft: { stated_condition: condition, suction, cycle },
+      })
+    : null;
+
   async function submit() {
     if (!session || !condition || busy) return;
     setBusy(true);
     setError("");
     try {
+      const local = computeCall({
+        protocol,
+        session,
+        history: checkIns,
+        draft: { stated_condition: condition, suction, cycle },
+      });
       const photos = [];
       for (const slot of camera.slots) {
         if (!slot) continue;
@@ -72,7 +99,21 @@ export default function CaptureSheet({ open, onOpenChange, session, lastCheckIn,
         is_dry: false,
       });
 
-      await runEvaluate({ data: { checkInId: created.id } });
+      try {
+        await runEvaluate({ data: { checkInId: created.id } });
+      } catch {
+        // The call still stands: keep the device verdict on the record and let the
+        // sync hook confirm it once the connection is back.
+        await base44.entities.CheckIn.update(created.id, {
+          elapsed_min: local.elapsed,
+          round: local.round,
+          effective_severity: local.severity,
+          call_issued: local.call,
+          call_reason: local.reason,
+          break_minutes: local.break_minutes,
+          unsynced: true,
+        }).catch(() => {});
+      }
       onSubmitted(created.id);
     } catch (err) {
       setError(err?.message || "Could not save that check-in.");
@@ -149,6 +190,16 @@ export default function CaptureSheet({ open, onOpenChange, session, lastCheckIn,
             </button>
           ))}
         </div>
+
+        {preview && (
+          <div className="mt-4 rounded-xl border border-border p-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Call</p>
+            <p className={`mt-1 text-[15px] font-medium ${CALL_TEXT[preview.call]}`}>
+              {CALL_LABEL[preview.call]}
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{preview.reason}</p>
+          </div>
+        )}
 
         <div className="mt-6">
           <div className="flex items-baseline justify-between">

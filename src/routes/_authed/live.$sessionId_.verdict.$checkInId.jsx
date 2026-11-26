@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import useCheckInSync from "@/hooks/use-checkin-sync";
 import { CALL_LABEL, CALL_TEXT, CONDITION_LABEL, CYCLE_LABEL, SUCTION_LABEL } from "@/lib/session-utils";
 
 export const Route = createFileRoute("/_authed/live/$sessionId_/verdict/$checkInId")({
@@ -26,6 +27,11 @@ function VerdictPage() {
       setNote(record.override_note ?? "");
     });
   }, [checkInId]);
+
+  // A call decided on the device confirms itself once the connection is back.
+  useCheckInSync(sessionId, () => {
+    base44.entities.CheckIn.get(checkInId).then((record) => setCheckIn(record));
+  });
 
   async function save(nextOverridden, nextNote) {
     setSaving(true);
@@ -63,6 +69,12 @@ function VerdictPage() {
         <span>{CYCLE_LABEL[checkIn.cycle] ?? "Cycle unset"}</span>
         {checkIn.stated_condition && <span>{CONDITION_LABEL[checkIn.stated_condition]}</span>}
       </div>
+
+      {checkIn.unsynced && (
+        <p className="mt-4 rounded-xl border border-border px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+          This call was made on the device. It confirms with the server the moment the connection is back.
+        </p>
+      )}
 
       <div className="mt-7 rounded-xl border border-border p-4">
         <div className="flex items-center justify-between">

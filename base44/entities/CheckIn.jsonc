@@ -156,6 +156,11 @@
       "default": false,
       "description": "Whether this round was dry."
     },
+    "unsynced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the call was decided on the device and still needs the server to confirm it."
+    },
     "commentary": {
       "type": "string",
       "format": "textarea",
