@@ -1,4 +1,4 @@
-import { CONDITION_LABEL, CYCLE_LABEL, PLAN_LABEL, SUCTION_LABEL, TOY_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
+import { CONDITION_LABEL, CYCLE_LABEL, PLAN_LABEL, RECEIVER_LABEL, SUCTION_LABEL, TOY_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
 
 // One session inside a block: what was on, and every round in order.
 export default function BlockSession({ session, checkIns = [] }) {
@@ -22,6 +22,12 @@ export default function BlockSession({ session, checkIns = [] }) {
           {typeof session.stretcher_remove_at_min === "number"
             ? ` · stretcher off at ${session.stretcher_remove_at_min} min`
             : ""}
+        </p>
+      )}
+
+      {(session.receivers ?? []).length > 0 && (
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          On: {(session.receivers ?? []).map((receiver) => RECEIVER_LABEL[receiver] ?? receiver).join(", ")}
         </p>
       )}
 

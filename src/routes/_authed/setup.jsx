@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import ReceiverPicker from "@/components/block/ReceiverPicker";
 import KitChecklist from "@/components/session/KitChecklist";
 import Segmented from "@/components/session/Segmented";
 import Stepper from "@/components/session/Stepper";
 import {
   CONSTRICTION_LABEL,
   PLAN_LABEL,
+  RECEIVER_LABEL,
   SUCTION_LABEL,
   SUCTION_LEVELS,
   TOY_LABEL,
@@ -42,6 +44,7 @@ function SetupPage() {
   const [suction, setSuction] = useState("very_low");
   const [buildMin, setBuildMin] = useState(8);
   const [ruinRound, setRuinRound] = useState("none");
+  const [receivers, setReceivers] = useState(["front"]);
   const [kitChecked, setKitChecked] = useState({});
   const [kitConfirmed, setKitConfirmed] = useState(false);
   const [stretcherMin, setStretcherMin] = useState(15);
@@ -77,9 +80,26 @@ function SetupPage() {
     setBusy(true);
     setError("");
     try {
+      // A block is a count of sessions: this one joins the open block, or opens the next.
+      const newest = (await base44.entities.Block.list("-number", 1))[0] ?? null;
+      let block = newest;
+      if (!block) {
+        block = await base44.entities.Block.create({ number: 1, size: 10 });
+      } else {
+        const taken = await base44.entities.Session.count({ block: block.id });
+        if (taken >= (block.size ?? 10)) {
+          block = await base44.entities.Block.create({
+            number: (block.number ?? 0) + 1,
+            size: block.size ?? 10,
+          });
+        }
+      }
+
       const created = await base44.entities.Session.create({
         start_time: new Date().toISOString(),
         plan_type: planType,
+        block: block.id,
+        receivers,
         planned_build_min: buildMin,
         ruin_target_round: ruinRound === "none" ? undefined : Number(ruinRound),
         forced_ruin_done: false,
@@ -119,6 +139,8 @@ function SetupPage() {
             <Segmented options={PLAN_OPTIONS} value={planType} onChange={setPlanType} />
           </div>
         </div>
+
+        <ReceiverPicker value={receivers} onChange={setReceivers} />
 
         {planType !== "denial" && (
           <>
@@ -181,6 +203,12 @@ function SetupPage() {
           <div className="flex justify-between gap-4">
             <span className="shrink-0 text-muted-foreground">Kit</span>
             <span className="text-right">{requiredKit.map((toy) => TOY_LABEL[toy] ?? toy).join(", ")}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="shrink-0 text-muted-foreground">On</span>
+            <span className="text-right">
+              {receivers.length ? receivers.map((receiver) => RECEIVER_LABEL[receiver] ?? receiver).join(", ") : "—"}
+            </span>
           </div>
           {planType === "denial" ? (
             <>

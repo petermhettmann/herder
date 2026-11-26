@@ -23,6 +23,23 @@
       ],
       "description": "Which plan the session follows."
     },
+    "block": {
+      "type": "string",
+      "format": "relation",
+      "description": "Block this session counts towards."
+    },
+    "receivers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "front",
+          "back",
+          "mouth"
+        ]
+      },
+      "description": "What the session was taken on, picked at setup."
+    },
     "planned_build_min": {
       "type": "integer",
       "minimum": 0,

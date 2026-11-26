@@ -1,0 +1,88 @@
+{
+  "name": "DayLog",
+  "type": "object",
+  "properties": {
+    "block": {
+      "type": "string",
+      "format": "relation",
+      "description": "Block this day belongs to."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "The day being logged."
+    },
+    "sleep_hours": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 24,
+      "description": "Hours slept the night before."
+    },
+    "hydration": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Glasses of water through the day."
+    },
+    "cage": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the cage was on for the day."
+    },
+    "denial": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the day was held in denial."
+    },
+    "edges": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Edges taken that day."
+    }
+  },
+  "required": [
+    "block",
+    "date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

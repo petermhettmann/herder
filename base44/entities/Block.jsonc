@@ -1,0 +1,67 @@
+{
+  "name": "Block",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Block number, counted from one."
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 10,
+      "description": "How many sessions this block runs for."
+    },
+    "note": {
+      "type": "string",
+      "format": "text",
+      "description": "What this block is for."
+    }
+  },
+  "required": [
+    "number",
+    "size"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

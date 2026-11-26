@@ -15,6 +15,8 @@ export const TOY_LABEL = {
   sound: "Sound",
   cock_ring: "Cock ring",
 };
+export const RECEIVERS = ["front", "back", "mouth"];
+export const RECEIVER_LABEL = { front: "Front", back: "Back", mouth: "Mouth" };
 export const TOY_INSTRUCTION = {
   stretcher: "on before the receiver",
   prostate_plug: "insert at the swap",

@@ -70,7 +70,13 @@ function HomePage() {
         <Link to="/setup">Start a session</Link>
       </Button>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <Link
+          to="/blocks"
+          className="block h-12 rounded-xl border border-border text-center text-[13px] leading-[3rem] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Blocks
+        </Link>
         <Link
           to="/history"
           className="block h-12 rounded-xl border border-border text-center text-[13px] leading-[3rem] text-muted-foreground transition-colors hover:text-foreground"

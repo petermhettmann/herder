@@ -1,9 +1,10 @@
+import BlockConditions from "@/components/block/BlockConditions";
 import BlockSession from "@/components/block/BlockSession";
 import BlockTotals from "@/components/block/BlockTotals";
 import InspectorTrend from "@/components/block/InspectorTrend";
 
-// BLOCK [n] — [dates]. Takes the block's sessions and every check-in in it.
-export default function BlockReport({ number, dates, sessions = [], checkIns = [] }) {
+// BLOCK [n] — [dates]. Takes the block's sessions, every check-in in it, and its daily log.
+export default function BlockReport({ number, dates, size, sessions = [], checkIns = [], days = [], onLogDay }) {
   const ordered = [...sessions].sort((a, b) => Date.parse(a.start_time) - Date.parse(b.start_time));
 
   const bySession = new Map();
@@ -17,7 +18,11 @@ export default function BlockReport({ number, dates, sessions = [], checkIns = [
     <div className="animate-fade-up pb-4">
       <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Block {number}</p>
       <h1 className="mt-1 font-heading text-[24px] font-medium leading-tight tracking-[-0.02em]">{dates}</h1>
+      <p className="tnum mt-1 text-[11px] text-muted-foreground">
+        {ordered.length} of {size ?? "—"} sessions
+      </p>
 
+      <BlockConditions days={days} onLogDay={onLogDay} />
       <BlockTotals sessions={ordered} />
       <InspectorTrend checkIns={checkIns} />
 
