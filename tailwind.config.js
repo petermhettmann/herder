@@ -80,6 +80,11 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
+  			call: {
+  				go: 'hsl(var(--call-go))',
+  				caution: 'hsl(var(--call-caution))',
+  				stop: 'hsl(var(--call-stop))'
+  			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',

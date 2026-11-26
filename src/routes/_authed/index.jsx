@@ -1,5 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { Button } from "@/components/ui/button";
+import { PLAN_LABEL, STATUS_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
 
 export const Route = createFileRoute("/_authed/")({
   ssr: false,
@@ -13,60 +17,80 @@ export const Route = createFileRoute("/_authed/")({
   component: HomePage,
 });
 
-const directions = [
-  { n: "01", label: "Tasks and priorities", detail: "One list of what actually needs doing today." },
-  { n: "02", label: "Animals and livestock", detail: "Herd records, health, breeding and history." },
-  { n: "03", label: "People and follow-ups", detail: "Where each relationship stands, and what is owed." },
-];
-
 function HomePage() {
   const { user, isLoadingAuth } = useAuth();
+  const [sessions, setSessions] = useState(null);
 
-  if (isLoadingAuth) {
+  useEffect(() => {
+    base44.entities.Session.list("-start_time", 20).then((items) => setSessions(items ?? []));
+  }, []);
+
+  if (isLoadingAuth || !sessions) {
     return (
       <div className="space-y-3" aria-hidden="true">
         <div className="h-3 w-20 rounded-sm bg-secondary" />
         <div className="h-7 w-64 rounded-sm bg-secondary" />
-        <div className="h-3 w-48 rounded-sm bg-secondary" />
         <div className="mt-8 h-40 rounded-xl border border-border" />
       </div>
     );
   }
 
+  const open = sessions.find((session) => session.status === "active" || session.status === "break");
+  const lastEnded = sessions.find((session) => session.status === "ended");
+
   return (
     <div className="animate-fade-up">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Setting up</p>
+      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+        {user?.full_name ? user.full_name : "Herder"}
+      </p>
 
-      <h1 className="mt-3 font-heading text-[27px] font-medium leading-[1.15] tracking-[-0.02em]">
-        Herder is ready.
-        <br />
-        <span className="text-muted-foreground">Nothing to track yet.</span>
+      <h1 className="mt-2 font-heading text-[27px] font-medium leading-[1.15] tracking-[-0.02em]">
+        {open ? "A session is open." : "Nothing running."}
       </h1>
 
-      <p className="mt-3 max-w-[34ch] text-[13px] leading-relaxed text-muted-foreground">
-        The frame is built: dark, flat, one accent, sized for a phone. The tracker lands here as soon as you name it.
-      </p>
+      {open && (
+        <Link
+          to="/live/$sessionId"
+          params={{ sessionId: open.id }}
+          className="mt-6 block rounded-xl border border-border p-4 transition-colors hover:bg-secondary"
+        >
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            {STATUS_LABEL[open.status]}
+          </p>
+          <p className="mt-1 text-[14px] font-medium">
+            {PLAN_LABEL[open.plan_type]} · started {shortDate(open.start_time)}
+          </p>
+          <p className="tnum mt-1 text-[11px] text-muted-foreground">
+            {open.rounds_total ?? 0} rounds · {open.breaks_total ?? 0} breaks
+          </p>
+        </Link>
+      )}
 
-      <div className="mt-8 overflow-hidden rounded-xl border border-border">
-        {directions.map((item) => (
-          <div
-            key={item.n}
-            className="flex gap-4 border-b border-border px-4 py-4 last:border-b-0"
-          >
-            <span className="tnum w-5 shrink-0 pt-[2px] text-[11px] text-muted-foreground">
-              {item.n}
-            </span>
-            <div className="min-w-0">
-              <p className="text-[14px] font-medium leading-tight">{item.label}</p>
-              <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{item.detail}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Button asChild className="mt-6 h-14 w-full rounded-xl text-[14px]">
+        <Link to="/setup">Start a session</Link>
+      </Button>
 
-      <p className="mt-6 text-[11px] leading-relaxed text-muted-foreground">
-        Signed in as <span className="text-foreground">{user?.email || "your account"}</span>
-      </p>
+      <Link
+        to="/history"
+        className="mt-3 block h-12 rounded-xl border border-border text-center text-[13px] leading-[3rem] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        History
+      </Link>
+
+      {lastEnded && (
+        <Link
+          to="/live/$sessionId/debrief"
+          params={{ sessionId: lastEnded.id }}
+          className="mt-8 block border-t border-border pt-4"
+        >
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Last session</p>
+          <p className="mt-1 text-[13px]">
+            {shortDate(lastEnded.start_time)} · {lastEnded.rounds_total ?? 0} rounds ·{" "}
+            {lastEnded.ended_at ? `${minutesBetween(lastEnded.start_time, lastEnded.ended_at)} min` : "—"}
+          </p>
+          <p className="mt-1 text-[11px] text-primary">Open debrief</p>
+        </Link>
+      )}
     </div>
   );
 }

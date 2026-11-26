@@ -107,6 +107,21 @@
       "format": "textarea",
       "description": "The debrief written after the session."
     },
+    "best_moment": {
+      "type": "string",
+      "format": "textarea",
+      "description": "Debrief: the best moment of the session."
+    },
+    "where_turned": {
+      "type": "string",
+      "format": "textarea",
+      "description": "Debrief: where the session turned."
+    },
+    "would_change": {
+      "type": "string",
+      "format": "textarea",
+      "description": "Debrief: what would be changed next time."
+    },
     "would_repeat": {
       "type": "integer",
       "minimum": 1,

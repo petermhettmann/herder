@@ -24,6 +24,10 @@
     --border: 240 4% 17%;
     --input: 240 4% 19%;
     --ring: 38 88% 62%;
+    /* Verdict tones: green go, amber caution, red stop. Never used for plain actions. */
+    --call-go: 148 42% 52%;
+    --call-caution: 34 84% 58%;
+    --call-stop: 0 62% 57%;
     --chart-1: 38 88% 62%;
     --chart-2: 200 12% 62%;
     --chart-3: 30 20% 45%;
