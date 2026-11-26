@@ -70,12 +70,20 @@ function HomePage() {
         <Link to="/setup">Start a session</Link>
       </Button>
 
-      <Link
-        to="/history"
-        className="mt-3 block h-12 rounded-xl border border-border text-center text-[13px] leading-[3rem] text-muted-foreground transition-colors hover:text-foreground"
-      >
-        History
-      </Link>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Link
+          to="/history"
+          className="block h-12 rounded-xl border border-border text-center text-[13px] leading-[3rem] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          History
+        </Link>
+        <Link
+          to="/mistress"
+          className="block h-12 rounded-xl border border-border text-center text-[13px] leading-[3rem] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Mistress
+        </Link>
+      </div>
 
       {lastEnded && (
         <Link

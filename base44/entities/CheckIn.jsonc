@@ -155,6 +155,11 @@
       "type": "boolean",
       "default": false,
       "description": "Whether this round was dry."
+    },
+    "commentary": {
+      "type": "string",
+      "format": "textarea",
+      "description": "Mistress commentary on this check-in, written by the agent only."
     }
   },
   "required": [
