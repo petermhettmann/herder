@@ -151,6 +151,11 @@
       "format": "text",
       "description": "What the override was and why."
     },
+    "overridden_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the call was overridden. Set once on the override and cleared if it is taken back."
+    },
     "is_dry": {
       "type": "boolean",
       "default": false,

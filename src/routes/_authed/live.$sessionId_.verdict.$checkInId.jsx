@@ -34,12 +34,17 @@ function VerdictPage() {
   });
 
   async function save(nextOverridden, nextNote) {
+    // The stamp is written once, when the call is first overridden, and survives later
+    // edits to the note. Taking the override back clears it.
+    const stamp = nextOverridden ? checkIn?.overridden_at ?? new Date().toISOString() : null;
     setSaving(true);
     try {
       await base44.entities.CheckIn.update(checkInId, {
         overridden: nextOverridden,
         override_note: nextNote || undefined,
+        overridden_at: stamp,
       });
+      setCheckIn((previous) => ({ ...previous, overridden: nextOverridden, override_note: nextNote, overridden_at: stamp }));
     } finally {
       setSaving(false);
     }
