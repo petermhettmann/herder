@@ -12,6 +12,33 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+  		/* Flat design: no elevation anywhere. */
+  		boxShadow: {
+  			none: 'none',
+  			DEFAULT: 'none',
+  			sm: 'none',
+  			md: 'none',
+  			lg: 'none',
+  			xl: 'none',
+  			'2xl': 'none',
+  			inner: 'none'
+  		},
+  		/* Two weights only: 400 and 500. */
+  		fontWeight: {
+  			thin: '400',
+  			extralight: '400',
+  			light: '400',
+  			normal: '400',
+  			medium: '500',
+  			semibold: '500',
+  			bold: '500',
+  			extrabold: '500',
+  			black: '500'
+  		},
+  		/* Minimum readable size is 11px. */
+  		fontSize: {
+  			'2xs': ['11px', { lineHeight: '15px' }]
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -86,11 +113,16 @@ export default {
   				to: {
   					height: '0'
   				}
+  			},
+  			'fade-up': {
+  				from: { opacity: '0', transform: 'translateY(6px)' },
+  				to: { opacity: '1', transform: 'translateY(0)' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'fade-up': 'fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both'
   		}
   	}
   },
