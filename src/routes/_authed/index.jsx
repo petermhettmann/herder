@@ -44,7 +44,7 @@ function HomePage() {
       </h1>
 
       <p className="mt-3 max-w-[34ch] text-[13px] leading-relaxed text-muted-foreground">
-        One answer left in the chat, and this screen becomes the thing you open every morning.
+        The frame is built: dark, flat, one accent, sized for a phone. The tracker lands here as soon as you name it.
       </p>
 
       <div className="mt-8 overflow-hidden rounded-xl border border-border">
