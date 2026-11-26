@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import BurstCamera from "@/components/session/BurstCamera";
 import Stepper from "@/components/session/Stepper";
+import ToyRow from "@/components/session/ToyRow";
 import VoiceNote from "@/components/session/VoiceNote";
 import useBurstCamera from "@/components/session/useBurstCamera";
 import { computeCall } from "@/lib/verdict";
@@ -43,6 +44,7 @@ export default function CaptureSheet({
   const [closeness, setCloseness] = useState(5);
   const [suction, setSuction] = useState("very_low");
   const [cycle, setCycle] = useState("normal");
+  const [toys, setToys] = useState([]);
   const [felt, setFelt] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -55,8 +57,9 @@ export default function CaptureSheet({
     setError("");
     setSuction(lastCheckIn?.suction ?? session?.start_suction ?? "very_low");
     setCycle(lastCheckIn?.cycle ?? "normal");
+    setToys(session?.toys ?? []);
     camera.reset();
-  }, [open, lastCheckIn?.id, session?.start_suction, camera.reset]);
+  }, [open, lastCheckIn?.id, session?.id, session?.start_suction, camera.reset]);
 
   // The call for what is picked, decided here with the same table the server uses.
   const preview = session && condition
@@ -64,7 +67,7 @@ export default function CaptureSheet({
         protocol,
         session,
         history: checkIns,
-        draft: { stated_condition: condition, suction, cycle },
+        draft: { stated_condition: condition, suction, cycle, toys_active: toys },
       })
     : null;
 
@@ -77,7 +80,7 @@ export default function CaptureSheet({
         protocol,
         session,
         history: checkIns,
-        draft: { stated_condition: condition, suction, cycle },
+        draft: { stated_condition: condition, suction, cycle, toys_active: toys },
       });
       const photos = [];
       for (const slot of camera.slots) {
@@ -96,6 +99,7 @@ export default function CaptureSheet({
         cycle,
         stated_condition: condition,
         closeness,
+        toys_active: toys,
         photo_burst: photos,
         felt_text: felt || undefined,
         is_dry: false,
@@ -193,6 +197,12 @@ export default function CaptureSheet({
             </button>
           ))}
         </div>
+
+        {(session?.toys ?? []).length > 0 && (
+          <div className="mt-6">
+            <ToyRow toys={session.toys} value={toys} onChange={setToys} />
+          </div>
+        )}
 
         {preview && (
           <div className="mt-4 rounded-xl border border-border p-3">

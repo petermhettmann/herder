@@ -97,7 +97,18 @@ export function computeCall({ protocol, session, history = [], draft = {}, now =
   const forcedGapMs = previous?.forced ? now - Date.parse(previous.created_date ?? "") : Number.POSITIVE_INFINITY;
   const swapToTraditional = Boolean(entry.forced) && session?.constriction === "constriction";
 
-  if (entry.forced) {
+  // The kit owns the call when the stretcher is due off and still on. A ruin taken on this
+  // same check-in still owns it, so the dead stop is never replaced.
+  const activeToys = Array.isArray(entry.toys_active) ? entry.toys_active : session?.toys ?? [];
+  const removeAt = session?.stretcher_remove_at_min;
+  const stretcherDue =
+    !entry.forced && typeof removeAt === "number" && elapsed >= removeAt && activeToys.includes("stretcher");
+
+  if (stretcherDue) {
+    call = "remove_stretcher";
+    reason = "stretcher due off at swap";
+    target = keep;
+  } else if (entry.forced) {
     call = "dead_stop";
     breakMinutes = 1;
     reason = swapToTraditional

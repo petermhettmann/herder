@@ -6,6 +6,30 @@ export const CONDITIONS = ["fine", "puffy", "tight_numb", "raw"];
 export const CONDITION_LABEL = { fine: "Fine", puffy: "Puffy", tight_numb: "Tight / numb", raw: "Raw" };
 export const PLAN_LABEL = { full: "Full", forced: "Forced", payoff: "Payoff", denial: "Denial" };
 export const CONSTRICTION_LABEL = { traditional: "Traditional", constriction: "Constriction" };
+export const TOYS = ["stretcher", "prostate_plug", "wand", "pocket_pussy", "sound", "cock_ring"];
+export const TOY_LABEL = {
+  stretcher: "Stretcher",
+  prostate_plug: "Prostate plug",
+  wand: "Wand",
+  pocket_pussy: "Pocket pussy",
+  sound: "Sound",
+  cock_ring: "Cock ring",
+};
+export const TOY_INSTRUCTION = {
+  stretcher: "on before the receiver",
+  prostate_plug: "insert at the swap",
+};
+// Used until the protocol record carries its own kit per plan type.
+export const DEFAULT_KIT = {
+  full: ["stretcher", "wand"],
+  forced: ["stretcher", "prostate_plug", "wand"],
+  payoff: ["wand"],
+  denial: ["wand"],
+};
+export function kitFor(protocol, planType) {
+  const list = protocol?.default_kit?.[planType];
+  return Array.isArray(list) ? list.filter((toy) => TOYS.includes(toy)) : DEFAULT_KIT[planType] ?? [];
+}
 export const STATUS_LABEL = { planned: "Planned", active: "Active", break: "On break", ended: "Ended" };
 export const CALL_LABEL = {
   continue: "Continue",
@@ -17,6 +41,7 @@ export const CALL_LABEL = {
   hold_then_stop: "Hold, then stop",
   dead_stop: "Dead stop",
   re_drive: "Re-drive",
+  remove_stretcher: "Remove stretcher",
   swap_to_traditional: "Swap to traditional",
 };
 export const CALL_TEXT = {
@@ -29,6 +54,7 @@ export const CALL_TEXT = {
   hold_then_stop: "text-call-stop",
   dead_stop: "text-call-stop",
   re_drive: "text-call-caution",
+  remove_stretcher: "text-call-caution",
   swap_to_traditional: "text-call-caution",
 };
 export const CALL_DOT = {
@@ -41,6 +67,7 @@ export const CALL_DOT = {
   hold_then_stop: "bg-call-stop",
   dead_stop: "bg-call-stop",
   re_drive: "bg-call-caution",
+  remove_stretcher: "bg-call-caution",
   swap_to_traditional: "bg-call-caution",
 };
 

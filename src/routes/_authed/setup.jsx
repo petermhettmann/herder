@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import KitChecklist from "@/components/session/KitChecklist";
 import Segmented from "@/components/session/Segmented";
 import Stepper from "@/components/session/Stepper";
 import {
@@ -12,6 +13,8 @@ import {
   PLAN_LABEL,
   SUCTION_LABEL,
   SUCTION_LEVELS,
+  TOY_LABEL,
+  kitFor,
   step,
 } from "@/lib/session-utils";
 
@@ -39,6 +42,9 @@ function SetupPage() {
   const [suction, setSuction] = useState("very_low");
   const [buildMin, setBuildMin] = useState(8);
   const [ruinRound, setRuinRound] = useState("none");
+  const [kitChecked, setKitChecked] = useState({});
+  const [kitConfirmed, setKitConfirmed] = useState(false);
+  const [stretcherMin, setStretcherMin] = useState(15);
   const [briefing, setBriefing] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -55,8 +61,19 @@ function SetupPage() {
       .catch(() => {});
   }, []);
 
+  // The kit is pre-ticked from the protocol and starts again whenever the plan changes.
+  useEffect(() => {
+    const required = kitFor(protocol, planType);
+    setKitChecked(Object.fromEntries(required.map((toy) => [toy, true])));
+    setKitConfirmed(false);
+    setStretcherMin(buildMin);
+  }, [protocol, planType]);
+
+  const requiredKit = kitFor(protocol, planType);
+  const kitReady = requiredKit.length > 0 && requiredKit.every((toy) => kitChecked[toy]) && kitConfirmed;
+
   async function approve() {
-    if (busy) return;
+    if (busy || !kitReady) return;
     setBusy(true);
     setError("");
     try {
@@ -66,6 +83,9 @@ function SetupPage() {
         planned_build_min: buildMin,
         ruin_target_round: ruinRound === "none" ? undefined : Number(ruinRound),
         forced_ruin_done: false,
+        toys: requiredKit.filter((toy) => kitChecked[toy]),
+        kit_confirmed: true,
+        stretcher_remove_at_min: requiredKit.includes("stretcher") ? stretcherMin : undefined,
         constriction,
         start_suction: suction,
         status: "active",
@@ -139,6 +159,16 @@ function SetupPage() {
             </div>
           </>
         )}
+
+        <KitChecklist
+          required={requiredKit}
+          checked={kitChecked}
+          onToggle={(toy) => setKitChecked((previous) => ({ ...previous, [toy]: !previous[toy] }))}
+          confirmed={kitConfirmed}
+          onConfirm={setKitConfirmed}
+          stretcherMin={stretcherMin}
+          onStretcherMin={setStretcherMin}
+        />
       </div>
 
       <div className="mt-8 rounded-xl border border-border p-4">
@@ -147,6 +177,10 @@ function SetupPage() {
           <div className="flex justify-between">
             <span className="text-muted-foreground">Plan</span>
             <span>{PLAN_LABEL[planType]}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="shrink-0 text-muted-foreground">Kit</span>
+            <span className="text-right">{requiredKit.map((toy) => TOY_LABEL[toy] ?? toy).join(", ")}</span>
           </div>
           {planType === "denial" ? (
             <>
@@ -191,12 +225,18 @@ function SetupPage() {
           className="mt-4 rounded-xl"
         />
 
+        {!kitReady && (
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Tick every item on the kit and confirm it to start.
+          </p>
+        )}
+
         {error && <p className="mt-3 text-[11px] text-call-stop">{error}</p>}
 
         <Button
           type="button"
           onClick={approve}
-          disabled={busy}
+          disabled={busy || !kitReady}
           className="mt-4 h-14 w-full rounded-xl text-[14px]"
         >
           {busy ? "Starting..." : "Approve and start"}

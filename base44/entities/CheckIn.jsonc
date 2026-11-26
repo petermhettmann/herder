@@ -40,6 +40,21 @@
       ],
       "description": "Wand intensity used at this edge, 1 to 5."
     },
+    "toys_active": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "stretcher",
+          "prostate_plug",
+          "wand",
+          "pocket_pussy",
+          "sound",
+          "cock_ring"
+        ]
+      },
+      "description": "Kit still on at this check-in. Defaults to the session kit."
+    },
     "ruined": {
       "type": "boolean",
       "default": false,
@@ -163,6 +178,7 @@
         "hold_then_stop",
         "dead_stop",
         "re_drive",
+        "remove_stretcher",
         "swap_to_traditional"
       ],
       "enumColors": [
@@ -174,6 +190,7 @@
         "purple",
         "yellow",
         "red",
+        "yellow",
         "yellow",
         "purple"
       ],

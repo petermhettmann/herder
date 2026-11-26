@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import BurstCamera from "@/components/session/BurstCamera";
+import ToyRow from "@/components/session/ToyRow";
 import useBurstCamera from "@/components/session/useBurstCamera";
 import { elapsedSeconds } from "@/lib/session-utils";
 
@@ -11,6 +12,7 @@ export default function DenialCaptureSheet({ open, onOpenChange, session, wand, 
   const camera = useBurstCamera(open);
   const [ruined, setRuined] = useState(false);
   const [missed, setMissed] = useState(false);
+  const [toys, setToys] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,8 +21,9 @@ export default function DenialCaptureSheet({ open, onOpenChange, session, wand, 
     setRuined(false);
     setMissed(false);
     setError("");
+    setToys(session?.toys ?? []);
     camera.reset();
-  }, [open, camera.reset]);
+  }, [open, session?.id, camera.reset]);
 
   async function submit() {
     if (!session || busy) return;
@@ -43,6 +46,7 @@ export default function DenialCaptureSheet({ open, onOpenChange, session, wand, 
         wand_intensity: wand,
         ruined,
         missed_count: missed,
+        toys_active: toys,
         photo_burst: photos,
       });
       onSubmitted(created.id);
@@ -80,6 +84,12 @@ export default function DenialCaptureSheet({ open, onOpenChange, session, wand, 
             onChange={setRuined}
           />
         </div>
+
+        {(session?.toys ?? []).length > 0 && (
+          <div className="mt-5">
+            <ToyRow toys={session.toys} value={toys} onChange={setToys} />
+          </div>
+        )}
 
         {error && <p className="mt-4 text-[11px] text-call-stop">{error}</p>}
 

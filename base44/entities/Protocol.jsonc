@@ -11,6 +11,11 @@
       "description": "Per plan type build/constriction tables: full, forced, payoff.",
       "additionalProperties": true
     },
+    "default_kit": {
+      "type": "object",
+      "description": "Required kit per plan type: full, forced, payoff, denial. Each value is a list of toy keys.",
+      "additionalProperties": true
+    },
     "severity_map": {
       "type": "object",
       "description": "Maps stated condition and observed signals to an effective severity 0-3.",

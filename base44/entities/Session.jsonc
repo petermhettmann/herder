@@ -38,6 +38,31 @@
       "default": false,
       "description": "Whether the forced ruin has already been taken this session."
     },
+    "toys": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "stretcher",
+          "prostate_plug",
+          "wand",
+          "pocket_pussy",
+          "sound",
+          "cock_ring"
+        ]
+      },
+      "description": "The kit confirmed for this session."
+    },
+    "kit_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the kit was ticked and confirmed before the session started."
+    },
+    "stretcher_remove_at_min": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Elapsed minutes at which the stretcher comes off. Unset means no removal point."
+    },
     "constriction": {
       "type": "string",
       "enum": [

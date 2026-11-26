@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CONDITION_LABEL, PLAN_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
+import { CONDITION_LABEL, PLAN_LABEL, TOY_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
 
 const HEAD_OPTIONS = ["fine", "puffy", "tight_numb", "raw"];
 
@@ -99,6 +99,22 @@ function DebriefPage() {
     return totals;
   }, { checks: 0, forced: 0, slipped: 0 });
 
+  // Each toy with the first and last minute it was still on, in the order it appeared.
+  const kitRows = (() => {
+    const byToy = new Map();
+    for (const checkIn of checkIns) {
+      const at = checkIn.elapsed_min ?? 0;
+      for (const toy of checkIn.toys_active ?? []) {
+        const row = byToy.get(toy) ?? { toy, first: at, last: at };
+        row.first = Math.min(row.first, at);
+        row.last = Math.max(row.last, at);
+        byToy.set(toy, row);
+      }
+    }
+    return [...byToy.values()].sort((a, b) => a.first - b.first);
+  })();
+  const stretcherOff = session.stretcher_remove_at_min;
+
   async function save() {
     setState("saving");
     try {
@@ -150,6 +166,32 @@ function DebriefPage() {
           </>
         )}
       </div>
+
+      {kitRows.length > 0 && (
+        <div className="mt-6 rounded-xl border border-border p-4">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Kit</p>
+          <div className="mt-3 space-y-2">
+            {kitRows.map((row) => {
+              const late = row.toy === "stretcher" && typeof stretcherOff === "number" && row.last >= stretcherOff;
+              return (
+                <div key={row.toy} className="flex items-baseline justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[12px]">{TOY_LABEL[row.toy] ?? row.toy}</p>
+                    {late && (
+                      <p className="mt-0.5 text-[11px] text-call-stop">
+                        left on past the swap, due off at {stretcherOff} min
+                      </p>
+                    )}
+                  </div>
+                  <span className="tnum shrink-0 text-[12px] text-muted-foreground">
+                    {row.first === row.last ? `from ${row.first} min` : `${row.first} to ${row.last} min`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="mt-7 space-y-5">
         <div>
