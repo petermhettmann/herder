@@ -1,0 +1,205 @@
+{
+  "name": "CheckIn",
+  "type": "object",
+  "properties": {
+    "session": {
+      "type": "string",
+      "format": "relation",
+      "description": "Session id this check-in belongs to."
+    },
+    "elapsed_min": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Minutes elapsed in the session at this check-in."
+    },
+    "round": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Round number at this check-in."
+    },
+    "suction": {
+      "type": "string",
+      "enum": [
+        "off",
+        "very_low",
+        "low",
+        "mid",
+        "high"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "green",
+        "yellow",
+        "red"
+      ],
+      "description": "Suction level at the check-in."
+    },
+    "cycle": {
+      "type": "string",
+      "enum": [
+        "slow",
+        "normal",
+        "fast"
+      ],
+      "enumColors": [
+        "blue",
+        "green",
+        "yellow"
+      ],
+      "description": "Cycle pace at the check-in."
+    },
+    "stated_condition": {
+      "type": "string",
+      "enum": [
+        "fine",
+        "puffy",
+        "tight_numb",
+        "raw"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "red",
+        "purple"
+      ],
+      "description": "Condition as stated by the user."
+    },
+    "effective_severity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Severity after mapping the stated condition and signals, 0 to 3."
+    },
+    "closeness": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "How close to the limit the user feels, 1 to 10."
+    },
+    "photo_burst": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "description": "Up to three photos taken at the check-in."
+    },
+    "inspector_severity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Severity read from the photos, 0 to 3."
+    },
+    "redness": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Redness read from the photos, 0 to 3."
+    },
+    "seal_quality": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Seal quality read from the photos, 0 to 3."
+    },
+    "inspector_note": {
+      "type": "string",
+      "format": "text",
+      "description": "Short note from the photo inspection."
+    },
+    "felt_text": {
+      "type": "string",
+      "format": "textarea",
+      "description": "What the user felt, in their own words."
+    },
+    "call_issued": {
+      "type": "string",
+      "enum": [
+        "continue",
+        "hold",
+        "drop",
+        "break",
+        "end"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "yellow",
+        "blue",
+        "red"
+      ],
+      "description": "The call made at this check-in."
+    },
+    "call_reason": {
+      "type": "string",
+      "format": "text",
+      "description": "Why that call was made."
+    },
+    "break_minutes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Break length in minutes, if a break was called."
+    },
+    "overridden": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user overrode the issued call."
+    },
+    "override_note": {
+      "type": "string",
+      "format": "text",
+      "description": "What the override was and why."
+    },
+    "is_dry": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this round was dry."
+    }
+  },
+  "required": [
+    "session",
+    "elapsed_min"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

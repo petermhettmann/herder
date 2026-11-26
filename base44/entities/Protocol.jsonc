@@ -1,0 +1,75 @@
+{
+  "name": "Protocol",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the active protocol (there is only ever one record)."
+    },
+    "plan_tables": {
+      "type": "object",
+      "description": "Per plan type build/constriction tables: full, forced, payoff.",
+      "additionalProperties": true
+    },
+    "severity_map": {
+      "type": "object",
+      "description": "Maps stated condition and observed signals to an effective severity 0-3.",
+      "additionalProperties": true
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "Call thresholds: when to continue, hold, drop, break or end.",
+      "additionalProperties": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this protocol is the one in force."
+    }
+  },
+  "required": [
+    "name",
+    "active"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

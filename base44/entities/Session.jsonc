@@ -1,0 +1,174 @@
+{
+  "name": "Session",
+  "type": "object",
+  "properties": {
+    "start_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the session started."
+    },
+    "plan_type": {
+      "type": "string",
+      "enum": [
+        "full",
+        "forced",
+        "payoff"
+      ],
+      "enumColors": [
+        "blue",
+        "purple",
+        "green"
+      ],
+      "description": "Which plan the session follows."
+    },
+    "planned_build_min": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Planned build duration in minutes."
+    },
+    "constriction": {
+      "type": "string",
+      "enum": [
+        "traditional",
+        "constriction"
+      ],
+      "enumColors": [
+        "gray",
+        "yellow"
+      ],
+      "description": "Constriction approach for the session."
+    },
+    "start_suction": {
+      "type": "string",
+      "description": "Suction level at the start of the session."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "active",
+        "break",
+        "ended"
+      ],
+      "enumColors": [
+        "gray",
+        "green",
+        "yellow",
+        "blue"
+      ],
+      "default": "planned",
+      "description": "Where the session stands right now."
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the session ended."
+    },
+    "rounds_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total rounds completed."
+    },
+    "breaks_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total breaks taken."
+    },
+    "dry_rounds": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of rounds marked dry."
+    },
+    "peak_elapsed_min": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Elapsed minutes at the peak point of the session."
+    },
+    "projected_end_min": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Projected end time in elapsed minutes."
+    },
+    "briefing": {
+      "type": "string",
+      "format": "textarea",
+      "description": "The briefing written before the session."
+    },
+    "debrief": {
+      "type": "string",
+      "format": "textarea",
+      "description": "The debrief written after the session."
+    },
+    "would_repeat": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Would repeat rating, 1 to 5."
+    },
+    "head_next_day": {
+      "type": "string",
+      "enum": [
+        "fine",
+        "puffy",
+        "tight_numb",
+        "raw",
+        "unknown"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "red",
+        "purple",
+        "gray"
+      ],
+      "default": "unknown",
+      "description": "Head condition the next day."
+    }
+  },
+  "required": [
+    "start_time",
+    "plan_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
