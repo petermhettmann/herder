@@ -74,9 +74,10 @@ function DebriefPage() {
   if (session.status !== "ended") {
     return (
       <div className="animate-fade-up">
-        <Link to="/live/$sessionId" params={{ sessionId }} className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground">
-          Session
-        </Link>
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          <Link to="/live/$sessionId" params={{ sessionId }} className="hover:text-foreground">Session</Link>
+          <Link to="/live/$sessionId/log" params={{ sessionId }} className="hover:text-foreground">Log</Link>
+        </div>
         <div className="mt-8 rounded-xl border border-border p-6 text-center">
           <Lock className="mx-auto h-5 w-5 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
           <p className="mt-3 text-[14px] font-medium">Debrief is locked</p>
@@ -133,9 +134,10 @@ function DebriefPage() {
 
   return (
     <div className="animate-fade-up pb-4">
-      <Link to="/live/$sessionId" params={{ sessionId }} className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground">
-        Session
-      </Link>
+      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+        <Link to="/live/$sessionId" params={{ sessionId }} className="hover:text-foreground">Session</Link>
+        <Link to="/live/$sessionId/log" params={{ sessionId }} className="hover:text-foreground">Log</Link>
+      </div>
 
       <h1 className="mt-2 font-heading text-[24px] font-medium tracking-[-0.02em]">Debrief</h1>
       <p className="mt-1 text-[12px] text-muted-foreground">

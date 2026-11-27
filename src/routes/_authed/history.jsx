@@ -88,6 +88,14 @@ function HistoryPage() {
                   >
                     Open
                   </Link>
+
+                  <Link
+                    to="/live/$sessionId/log"
+                    params={{ sessionId: session.id }}
+                    className="text-[11px] text-muted-foreground hover:text-foreground"
+                  >
+                    Log
+                  </Link>
                 </div>
               );
             })}
