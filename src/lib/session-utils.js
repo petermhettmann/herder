@@ -6,20 +6,39 @@ export const CONDITIONS = ["fine", "puffy", "tight_numb", "raw"];
 export const CONDITION_LABEL = { fine: "Fine", puffy: "Puffy", tight_numb: "Tight / numb", raw: "Raw" };
 export const PLAN_LABEL = { full: "Full", forced: "Forced", payoff: "Payoff", denial: "Denial" };
 export const CONSTRICTION_LABEL = { traditional: "Traditional", constriction: "Constriction" };
-export const TOYS = ["stretcher", "prostate_plug", "wand", "pocket_pussy", "sound", "cock_ring"];
+export const TOYS = [
+  "stretcher", "prostate_plug", "wand", "glans_cap", "pocket_pussy",
+  "sound", "cock_ring", "wedge", "spreader_bar", "restraints", "blindfold",
+];
 export const TOY_LABEL = {
   stretcher: "Stretcher",
   prostate_plug: "Prostate plug",
   wand: "Wand",
+  glans_cap: "Glans cap",
   pocket_pussy: "Pocket pussy",
   sound: "Sound",
   cock_ring: "Cock ring",
+  wedge: "Wedge",
+  spreader_bar: "Spreader bar",
+  restraints: "Restraints",
+  blindfold: "Blindfold",
+};
+export const MODES = ["machine", "quiet"];
+export const MODE_LABEL = { machine: "Machine", quiet: "Quiet kit" };
+export const DEFAULT_QUIET_KIT = {
+  full: ["wand", "glans_cap", "restraints"],
+  forced: ["wand", "glans_cap", "prostate_plug", "restraints"],
+  payoff: ["wand", "glans_cap"],
+  denial: ["wand", "glans_cap"],
 };
 export const RECEIVERS = ["front", "back", "mouth"];
 export const RECEIVER_LABEL = { front: "Front", back: "Back", mouth: "Mouth" };
 export const TOY_INSTRUCTION = {
   stretcher: "on before the receiver",
   prostate_plug: "insert at the swap",
+  glans_cap: "on the wand head, off for the last climb",
+  restraints: "on before the timer",
+  wedge: "under the hips",
 };
 // Used until the protocol record carries its own kit per plan type.
 export const DEFAULT_KIT = {
@@ -28,8 +47,9 @@ export const DEFAULT_KIT = {
   payoff: ["wand"],
   denial: ["wand"],
 };
-export function kitFor(protocol, planType) {
-  const list = protocol?.default_kit?.[planType];
+export function kitFor(protocol, planType, mode = "machine") {
+  const source = mode === "quiet" ? DEFAULT_QUIET_KIT : protocol?.default_kit;
+  const list = source?.[planType];
   return Array.isArray(list) ? list.filter((toy) => TOYS.includes(toy)) : DEFAULT_KIT[planType] ?? [];
 }
 export const STATUS_LABEL = { planned: "Planned", active: "Active", break: "On break", ended: "Ended" };
@@ -41,6 +61,7 @@ export const CALL_LABEL = {
   end: "End",
   log_ruin: "Ruin logged",
   hold_then_stop: "Hold, then stop",
+  hold_longer: "Hold longer",
   dead_stop: "Dead stop",
   re_drive: "Re-drive",
   remove_stretcher: "Remove stretcher",
@@ -54,6 +75,7 @@ export const CALL_TEXT = {
   end: "text-call-stop",
   log_ruin: "text-call-caution",
   hold_then_stop: "text-call-stop",
+  hold_longer: "text-call-caution",
   dead_stop: "text-call-stop",
   re_drive: "text-call-caution",
   remove_stretcher: "text-call-caution",
@@ -67,6 +89,7 @@ export const CALL_DOT = {
   end: "bg-call-stop",
   log_ruin: "bg-call-caution",
   hold_then_stop: "bg-call-stop",
+  hold_longer: "bg-call-caution",
   dead_stop: "bg-call-stop",
   re_drive: "bg-call-caution",
   remove_stretcher: "bg-call-caution",

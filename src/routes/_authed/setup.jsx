@@ -11,6 +11,7 @@ import Segmented from "@/components/session/Segmented";
 import Stepper from "@/components/session/Stepper";
 import {
   CONSTRICTION_LABEL,
+  MODE_LABEL,
   PLAN_LABEL,
   RECEIVER_LABEL,
   SUCTION_LABEL,
@@ -35,10 +36,14 @@ const RUIN_OPTIONS = ["none", "2", "3", "4", "5"].map((value) => ({
   value,
   label: value === "none" ? "None" : value,
 }));
+const MODE_OPTIONS = ["machine", "quiet"].map((value) => ({ value, label: MODE_LABEL[value] }));
 
 function SetupPage() {
   const navigate = useNavigate();
   const [protocol, setProtocol] = useState(null);
+  const [mode, setMode] = useState("machine");
+  const [intensity, setIntensity] = useState(1);
+  const [targetEdges, setTargetEdges] = useState(7);
   const [planType, setPlanType] = useState("full");
   const [constriction, setConstriction] = useState("traditional");
   const [suction, setSuction] = useState("very_low");
@@ -66,13 +71,13 @@ function SetupPage() {
 
   // The kit is pre-ticked from the protocol and starts again whenever the plan changes.
   useEffect(() => {
-    const required = kitFor(protocol, planType);
+    const required = kitFor(protocol, planType, mode);
     setKitChecked(Object.fromEntries(required.map((toy) => [toy, true])));
     setKitConfirmed(false);
     setStretcherMin(buildMin);
-  }, [protocol, planType]);
+  }, [protocol, planType, mode]);
 
-  const requiredKit = kitFor(protocol, planType);
+  const requiredKit = kitFor(protocol, planType, mode);
   const kitReady = requiredKit.length > 0 && requiredKit.every((toy) => kitChecked[toy]) && kitConfirmed;
 
   async function approve() {
@@ -84,30 +89,36 @@ function SetupPage() {
       const newest = (await base44.entities.Block.list("-number", 1))[0] ?? null;
       let block = newest;
       if (!block) {
-        block = await base44.entities.Block.create({ number: 1, size: 10 });
+        block = await base44.entities.Block.create({ number: 1, size: 10, mode });
       } else {
         const taken = await base44.entities.Session.count({ block: block.id });
         if (taken >= (block.size ?? 10)) {
           block = await base44.entities.Block.create({
             number: (block.number ?? 0) + 1,
             size: block.size ?? 10,
+            mode,
           });
         }
       }
 
+      const quiet = mode === "quiet";
       const created = await base44.entities.Session.create({
         start_time: new Date().toISOString(),
+        mode,
         plan_type: planType,
         block: block.id,
-        receivers,
-        planned_build_min: buildMin,
-        ruin_target_round: ruinRound === "none" ? undefined : Number(ruinRound),
+        receivers: quiet ? undefined : receivers,
+        planned_build_min: quiet ? undefined : buildMin,
+        start_intensity: quiet ? intensity : undefined,
+        target_edges: quiet ? targetEdges : undefined,
+        edges_total: quiet ? 0 : undefined,
+        ruin_target_round: quiet || ruinRound === "none" ? undefined : Number(ruinRound),
         forced_ruin_done: false,
         toys: requiredKit.filter((toy) => kitChecked[toy]),
         kit_confirmed: true,
         stretcher_remove_at_min: requiredKit.includes("stretcher") ? stretcherMin : undefined,
-        constriction,
-        start_suction: suction,
+        constriction: quiet ? undefined : constriction,
+        start_suction: quiet ? undefined : suction,
         status: "active",
         rounds_total: 0,
         breaks_total: 0,
@@ -116,7 +127,7 @@ function SetupPage() {
         briefing: briefing || undefined,
       });
       navigate({
-        to: planType === "denial" ? "/live/$sessionId/denial" : "/live/$sessionId",
+        to: quiet ? "/live/$sessionId/quiet" : planType === "denial" ? "/live/$sessionId/denial" : "/live/$sessionId",
         params: { sessionId: created.id },
       });
     } catch (err) {
@@ -134,15 +145,22 @@ function SetupPage() {
 
       <div className="mt-7 space-y-6">
         <div>
+          <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Mode</Label>
+          <div className="mt-2">
+            <Segmented options={MODE_OPTIONS} value={mode} onChange={setMode} />
+          </div>
+        </div>
+
+        <div>
           <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Plan type</Label>
           <div className="mt-2">
             <Segmented options={PLAN_OPTIONS} value={planType} onChange={setPlanType} />
           </div>
         </div>
 
-        <ReceiverPicker value={receivers} onChange={setReceivers} />
+        {mode === "machine" && <ReceiverPicker value={receivers} onChange={setReceivers} />}
 
-        {planType !== "denial" && (
+        {mode === "machine" && planType !== "denial" && (
           <>
             <div>
               <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Constriction</Label>
@@ -182,6 +200,23 @@ function SetupPage() {
           </>
         )}
 
+        {mode === "quiet" && (
+          <div className="grid grid-cols-2 gap-3">
+            <Stepper
+              label="Intensity"
+              display={`${intensity}`}
+              onDecrease={() => setIntensity((value) => Math.max(1, value - 1))}
+              onIncrease={() => setIntensity((value) => Math.min(5, value + 1))}
+            />
+            <Stepper
+              label="Target edges"
+              display={`${targetEdges}`}
+              onDecrease={() => setTargetEdges((value) => Math.max(1, value - 1))}
+              onIncrease={() => setTargetEdges((value) => Math.min(12, value + 1))}
+            />
+          </div>
+        )}
+
         <KitChecklist
           required={requiredKit}
           checked={kitChecked}
@@ -204,13 +239,26 @@ function SetupPage() {
             <span className="shrink-0 text-muted-foreground">Kit</span>
             <span className="text-right">{requiredKit.map((toy) => TOY_LABEL[toy] ?? toy).join(", ")}</span>
           </div>
-          <div className="flex justify-between gap-4">
-            <span className="shrink-0 text-muted-foreground">On</span>
-            <span className="text-right">
-              {receivers.length ? receivers.map((receiver) => RECEIVER_LABEL[receiver] ?? receiver).join(", ") : "—"}
-            </span>
-          </div>
-          {planType === "denial" ? (
+          {mode === "machine" && (
+            <div className="flex justify-between gap-4">
+              <span className="shrink-0 text-muted-foreground">On</span>
+              <span className="text-right">
+                {receivers.length ? receivers.map((receiver) => RECEIVER_LABEL[receiver] ?? receiver).join(", ") : "—"}
+              </span>
+            </div>
+          )}
+          {mode === "quiet" ? (
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Intensity</span>
+                <span className="tnum">{intensity}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Target</span>
+                <span className="tnum">{targetEdges} edges</span>
+              </div>
+            </>
+          ) : planType === "denial" ? (
             <>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Target</span>

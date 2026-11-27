@@ -20,7 +20,7 @@
     "edge_index": {
       "type": "integer",
       "minimum": 0,
-      "description": "Edge number within a denial session, counted from the previous edge."
+      "description": "Edge number within a denial or quiet session, counted from the previous edge."
     },
     "wand_intensity": {
       "type": "integer",
@@ -40,6 +40,36 @@
       ],
       "description": "Wand intensity used at this edge, 1 to 5."
     },
+    "intensity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Quiet kit: intensity used at this check-in, 1 to 5."
+    },
+    "pace": {
+      "type": "string",
+      "enum": [
+        "slow",
+        "normal",
+        "fast"
+      ],
+      "enumColors": [
+        "blue",
+        "green",
+        "yellow"
+      ],
+      "description": "Quiet kit: pace used at this check-in."
+    },
+    "held_sec": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Quiet kit: seconds the edge was held."
+    },
+    "finished": {
+      "type": "boolean",
+      "default": false,
+      "description": "Quiet kit: the session was finished on this check-in."
+    },
     "toys_active": {
       "type": "array",
       "items": {
@@ -48,9 +78,14 @@
           "stretcher",
           "prostate_plug",
           "wand",
+          "glans_cap",
           "pocket_pussy",
           "sound",
-          "cock_ring"
+          "cock_ring",
+          "wedge",
+          "spreader_bar",
+          "restraints",
+          "blindfold"
         ]
       },
       "description": "Kit still on at this check-in. Defaults to the session kit."
@@ -176,6 +211,7 @@
         "end",
         "log_ruin",
         "hold_then_stop",
+        "hold_longer",
         "dead_stop",
         "re_drive",
         "remove_stretcher",
@@ -188,6 +224,7 @@
         "blue",
         "red",
         "purple",
+        "yellow",
         "yellow",
         "red",
         "yellow",

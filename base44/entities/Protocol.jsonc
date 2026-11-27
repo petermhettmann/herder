@@ -16,6 +16,16 @@
       "description": "Required kit per plan type: full, forced, payoff, denial. Each value is a list of toy keys.",
       "additionalProperties": true
     },
+    "quiet_plan": {
+      "type": "object",
+      "description": "Quiet kit plan: cap_min, edge_target and intensity_ceiling.",
+      "additionalProperties": true
+    },
+    "persona_notes": {
+      "type": "object",
+      "description": "Notes the persona speaks from: voice, phrasing and what it will not say.",
+      "additionalProperties": true
+    },
     "severity_map": {
       "type": "object",
       "description": "Maps stated condition and observed signals to an effective severity 0-3.",

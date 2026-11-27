@@ -87,6 +87,13 @@ function LivePage() {
     }
   }, [session?.plan_type, sessionId]);
 
+  // A quiet session never runs here.
+  useEffect(() => {
+    if (session?.mode === "quiet") {
+      navigate({ to: "/live/$sessionId/quiet", params: { sessionId }, replace: true });
+    }
+  }, [session?.mode, sessionId]);
+
   // The running session is remembered on the device, so a reload restores the timer
   // before the record is fetched.
   useEffect(() => {

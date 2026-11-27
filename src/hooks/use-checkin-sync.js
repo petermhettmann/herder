@@ -4,8 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { evaluateCheckIn } from "@/lib/checkins";
 
 // Re-runs the server call for check-ins whose verdict was decided on the device.
-export default function useCheckInSync(sessionId, onReconciled) {
-  const runEvaluate = useServerFn(evaluateCheckIn);
+export default function useCheckInSync(sessionId, onReconciled, evaluate = evaluateCheckIn) {
+  const runEvaluate = useServerFn(evaluate);
   const notify = useRef(onReconciled);
 
   useEffect(() => {

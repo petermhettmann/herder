@@ -13,6 +13,19 @@
       "default": 10,
       "description": "How many sessions this block runs for."
     },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "machine",
+        "quiet"
+      ],
+      "enumColors": [
+        "blue",
+        "green"
+      ],
+      "default": "machine",
+      "description": "Which kind of session this block counts: machine kit or quiet kit. Taken from the session that opened it."
+    },
     "note": {
       "type": "string",
       "format": "text",
