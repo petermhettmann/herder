@@ -148,11 +148,7 @@ function DebriefPage() {
         <Stat label="Elapsed" value={elapsed != null ? `${elapsed} min` : "—"} />
         <Stat
           label={session.mode === "quiet" ? "Edges" : "Rounds"}
-          value={
-            session.mode === "quiet"
-              ? `${session.edges_total ?? 0} edges`
-              : `${session.rounds_total ?? 0}`
-          }
+          value={session.mode === "quiet" ? `${session.edges_total ?? 0}` : `${session.rounds_total ?? 0}`}
         />
         <Stat label="Breaks" value={session.breaks_total ?? 0} />
         <Stat label="Dry rounds" value={session.dry_rounds ?? 0} />
