@@ -14,7 +14,9 @@ export async function evaluateCheckInFor(base44, checkInId) {
   const history = (checkInPage.items ?? []).filter((item) => item.id !== checkIn.id);
 
   const verdict = computeCall({ protocol, session, history, draft: checkIn, now: Date.now() });
-  const roundsAfter = Math.max(session.rounds_total ?? 0, verdict.round);
+  // Only a call that takes a round raises the count; the rest write the existing value back.
+  const roundsBefore = session.rounds_total ?? 0;
+  const roundsAfter = verdict.advances_round ? Math.max(roundsBefore, verdict.round) : roundsBefore;
 
   await base44.entities.CheckIn.update(checkIn.id, {
     elapsed_min: verdict.elapsed,

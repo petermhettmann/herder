@@ -170,10 +170,17 @@ export function computeCall({ protocol, session, history = [], draft = {}, now =
     target = next;
   }
 
-  const round = typeof entry.round === "number" ? entry.round : roundsBefore + 1;
+  // A break, an end, a stretcher removal or a re-drive answers the check-in without taking a round.
+  const advances_round = !["break", "end", "remove_stretcher", "re_drive"].includes(call);
+  const round = advances_round
+    ? typeof entry.round === "number"
+      ? entry.round
+      : roundsBefore + 1
+    : roundsBefore;
 
   return {
     call,
+    advances_round,
     reason,
     target_suction: target.suction,
     target_cycle: target.cycle,
