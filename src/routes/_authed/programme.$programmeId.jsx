@@ -1,9 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import NightGrid from "@/components/programme/NightGrid";
 import NightSheet from "@/components/programme/NightSheet";
+import PlanExport from "@/components/programme/PlanExport";
 import { MODE_LABEL } from "@/lib/session-utils";
 
 export const Route = createFileRoute("/_authed/programme/$programmeId")({
@@ -133,13 +134,26 @@ function ProgrammePage() {
           </div>
         </div>
 
+        <div className="mt-4">
+          <PlanExport programme={programme} nights={nights} />
+          <Button
+            asChild
+            variant="ghost"
+            className="mt-2 h-11 w-full rounded-xl text-[13px] text-muted-foreground"
+          >
+            <Link to="/import" search={{ from: programme.id }}>
+              Re-import
+            </Link>
+          </Button>
+        </div>
+
         {programme.status === "active" && (
           <Button
             type="button"
             variant="outline"
             onClick={endProgramme}
             disabled={busy}
-            className="mt-4 h-12 w-full rounded-xl text-[13px]"
+            className="mt-2 h-12 w-full rounded-xl text-[13px]"
           >
             End programme
           </Button>

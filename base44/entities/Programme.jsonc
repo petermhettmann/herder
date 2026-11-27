@@ -17,26 +17,17 @@
         "green"
       ],
       "default": "machine",
-      "description": "Machine kit or quiet kit for every night it generates."
+      "description": "Machine kit or quiet kit for every night it carries."
     },
     "weeks": {
       "type": "integer",
-      "enum": [
-        4,
-        8,
-        12
-      ],
-      "enumColors": [
-        "blue",
-        "green",
-        "purple"
-      ],
-      "description": "How many weeks the programme runs."
+      "minimum": 1,
+      "description": "How many weeks the programme runs. Built programmes use 4, 8 or 12."
     },
     "start_date": {
       "type": "string",
       "format": "date",
-      "description": "The Monday or whatever weekday the first night falls on."
+      "description": "The first night's date."
     },
     "status": {
       "type": "string",
@@ -59,6 +50,29 @@
       "type": "string",
       "format": "textarea",
       "description": "What this block of weeks is for."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "built",
+        "imported"
+      ],
+      "enumColors": [
+        "blue",
+        "purple"
+      ],
+      "default": "built",
+      "description": "Whether the nights came from the builder or from pasted text."
+    },
+    "imported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the pasted text was imported."
+    },
+    "raw_text": {
+      "type": "string",
+      "format": "textarea",
+      "description": "The pasted plan, kept so it can be exported and re-imported."
     }
   },
   "required": [

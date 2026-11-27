@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -100,6 +100,13 @@ function BuildPage() {
       <Button type="submit" disabled={busy} className="mt-8 h-14 w-full rounded-xl text-[14px]">
         {busy ? "Building..." : `Build ${weeks} weeks`}
       </Button>
+
+      <Link
+        to="/import"
+        className="mt-4 block text-center text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        Paste a plan instead
+      </Link>
     </form>
   );
 }
