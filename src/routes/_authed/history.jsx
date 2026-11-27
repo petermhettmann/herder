@@ -36,9 +36,17 @@ function HistoryPage() {
     <div className="animate-fade-up pb-4">
       <div className="flex items-center justify-between">
         <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Sessions</p>
-        <Link to="/setup" className="text-[11px] uppercase tracking-[0.14em] text-primary hover:underline">
-          New
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/import"
+            className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:underline"
+          >
+            Import
+          </Link>
+          <Link to="/setup" className="text-[11px] uppercase tracking-[0.14em] text-primary hover:underline">
+            New
+          </Link>
+        </div>
       </div>
 
       <h1 className="mt-2 font-heading text-[24px] font-medium tracking-[-0.02em]">History</h1>

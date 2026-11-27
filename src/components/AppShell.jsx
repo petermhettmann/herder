@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Images, List, LogOut, Wand2 } from "lucide-react";
+import { Home, Images, List, LogOut, Upload, Wand2 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
 const TABS = [
   { to: "/", label: "Home", icon: Home },
   { to: "/history", label: "Sessions", icon: List },
   { to: "/archive", label: "Archive", icon: Images },
+  { to: "/import", label: "Import", icon: Upload },
   { to: "/mistress", label: "Mistress", icon: Wand2 },
 ];
 

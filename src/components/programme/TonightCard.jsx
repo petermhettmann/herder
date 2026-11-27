@@ -48,7 +48,13 @@ export default function TonightCard() {
     return (
       <div className="mt-6 rounded-xl border border-border p-4">
         <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Programme complete</p>
-        <p className="mt-1 text-[14px] font-medium">{state.programme.name}</p>
+        <Link
+          to="/programme/$programmeId"
+          params={{ programmeId: state.programme.id }}
+          className="mt-1 block text-[14px] font-medium transition-colors hover:text-primary"
+        >
+          {state.programme.name}
+        </Link>
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
           It ran to its last night. Build the next one when you are ready.
         </p>
@@ -61,13 +67,22 @@ export default function TonightCard() {
 
   if (!state.programme) {
     return (
-      <div className="mt-6">
-        <Link
-          to="/build"
-          className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Build a programme
-        </Link>
+      <div className="mt-6 rounded-xl border border-border p-4">
+        <p className="text-[13px] text-muted-foreground">No plan running.</p>
+        <div className="mt-2 flex items-center gap-4">
+          <Link
+            to="/import"
+            className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Import one
+          </Link>
+          <Link
+            to="/build"
+            className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Build one
+          </Link>
+        </div>
       </div>
     );
   }
@@ -77,26 +92,28 @@ export default function TonightCard() {
 
   return (
     <div className="mt-6 rounded-xl border border-border p-4">
-      <div className="flex items-baseline justify-between">
-        <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+      <Link
+        to="/programme/$programmeId"
+        params={{ programmeId: programme.id }}
+        className="flex items-baseline justify-between gap-3 transition-colors hover:text-foreground"
+      >
+        <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           {dark ? "Dark night" : "Tonight"}
-        </p>
-        <Link
-          to="/programme/$programmeId"
-          params={{ programmeId: programme.id }}
-          className="text-[11px] text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {programme.name}
-        </Link>
-      </div>
+        </span>
+        <span className="text-[11px] text-muted-foreground">{programme.name}</span>
+      </Link>
 
-      <p className="mt-1 text-[14px] font-medium">
+      <Link
+        to="/programme/$programmeId"
+        params={{ programmeId: programme.id }}
+        className="mt-1 block text-[14px] font-medium transition-colors hover:text-primary"
+      >
         {!night
           ? "Nothing scheduled."
           : dark
             ? "Nothing scheduled."
             : `${night.minutes} min · ${MODE_LABEL[night.mode] ?? night.mode} · level ${night.level}`}
-      </p>
+      </Link>
 
       {night?.denial && <p className="mt-1 text-[11px] text-call-caution">Ends on a denial.</p>}
       {night?.note && (
