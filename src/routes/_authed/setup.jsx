@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -86,9 +86,8 @@ function SetupPage() {
           if (found.edge_target) setTargetEdges(found.edge_target);
         } else {
           if (found.suction) setSuction(found.suction);
-          if (typeof found.minutes === "number") {
+          if (typeof found.minutes === "number" && found.minutes > 0) {
             setBuildMin(found.minutes);
-            setStretcherMin(found.minutes);
           }
           const target = found.ruin_target ? String(found.ruin_target) : null;
           if (target && RUIN_OPTIONS.some((option) => option.value === target)) setRuinRound(target);
@@ -102,8 +101,8 @@ function SetupPage() {
     const required = kitFor(protocol, planType, mode);
     setKitChecked(Object.fromEntries(required.map((toy) => [toy, true])));
     setKitConfirmed(false);
-    setStretcherMin(buildMin);
-  }, [protocol, planType, mode]);
+    setStretcherMin(night?.minutes > 0 ? night.minutes : buildMin);
+  }, [protocol, planType, mode, night]);
 
   const requiredKit = kitFor(protocol, planType, mode);
   const kitReady = requiredKit.length > 0 && requiredKit.every((toy) => kitChecked[toy]) && kitConfirmed;
@@ -113,6 +112,18 @@ function SetupPage() {
     setBusy(true);
     setError("");
     try {
+      // One session at a time: an open one is picked up again instead of starting a second.
+      const open = (await base44.entities.Session.list("-start_time", 5)).find(
+        (item) => item.status === "active" || item.status === "break"
+      );
+      if (open) {
+        navigate({
+          to: open.mode === "quiet" ? "/live/$sessionId/quiet" : "/live/$sessionId",
+          params: { sessionId: open.id },
+        });
+        return;
+      }
+
       // A block is a count of sessions: this one joins the open block, or opens the next.
       const newest = (await base44.entities.Block.list("-number", 1))[0] ?? null;
       let block = newest;
@@ -174,15 +185,28 @@ function SetupPage() {
         Set the session up.
       </h1>
 
+      {!nightId && (
+        <p className="mt-2 text-[12px] text-muted-foreground">Free session, nothing scheduled.</p>
+      )}
+
       {night && (
         <div className="mt-6 rounded-xl border border-border p-4">
-          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-            Programme night · week {night.week} · {night.weekday}
-          </p>
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              From the plan · week {night.week} · {night.weekday}
+            </p>
+            <Link
+              to="/setup"
+              className="text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Detach
+            </Link>
+          </div>
           {night.denial && <p className="mt-1 text-[11px] text-call-caution">Ends on a denial.</p>}
           {night.note && (
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{night.note}</p>
           )}
+          <p className="mt-2 text-[11px] text-muted-foreground">Prefilled from the plan. Change anything.</p>
         </div>
       )}
 
@@ -190,19 +214,14 @@ function SetupPage() {
         <div>
           <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Mode</Label>
           <div className="mt-2">
-            <Segmented options={MODE_OPTIONS} value={mode} onChange={setMode} disabled={Boolean(night)} />
+            <Segmented options={MODE_OPTIONS} value={mode} onChange={setMode} />
           </div>
         </div>
 
         <div>
           <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Plan type</Label>
           <div className="mt-2">
-            <Segmented
-              options={PLAN_OPTIONS}
-              value={planType}
-              onChange={setPlanType}
-              disabled={Boolean(night)}
-            />
+            <Segmented options={PLAN_OPTIONS} value={planType} onChange={setPlanType} />
           </div>
         </div>
 

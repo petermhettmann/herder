@@ -120,13 +120,15 @@ export default function TonightCard() {
         <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{night.note}</p>
       )}
 
-      {night && (
-        <Button asChild className="mt-3 h-12 w-full rounded-xl text-[13px]">
+      <Button asChild className="mt-3 h-12 w-full rounded-xl text-[13px]">
+        {night ? (
           <Link to="/setup" search={{ night: night.id }}>
             {dark ? "Start anyway" : "Start tonight"}
           </Link>
-        </Button>
-      )}
+        ) : (
+          <Link to="/setup">Start a session</Link>
+        )}
+      </Button>
     </div>
   );
 }
