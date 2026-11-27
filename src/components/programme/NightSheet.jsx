@@ -5,30 +5,51 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import Segmented from "@/components/session/Segmented";
 import Stepper from "@/components/session/Stepper";
+import { PLAN_LABEL } from "@/lib/session-utils";
 import { SUCTION_FOR } from "@/lib/programme";
 
 const LEVEL_OPTIONS = [1, 2, 3, 4].map((value) => ({ value, label: `${value}` }));
+const PLAN_OPTIONS = ["full", "forced", "payoff", "denial"].map((value) => ({
+  value,
+  label: PLAN_LABEL[value],
+}));
+
+const derivedCap = (minutes) => (minutes > 45 ? 7 : 6);
 
 export default function NightSheet({ night, busy, onClose, onSave, onSkip }) {
   const [minutes, setMinutes] = useState(0);
   const [level, setLevel] = useState(1);
   const [denial, setDenial] = useState(false);
+  const [plan, setPlan] = useState("full");
+  const [cap, setCap] = useState(null);
+  const [ruin, setRuin] = useState(null);
 
   useEffect(() => {
     if (!night) return;
     setMinutes(night.minutes ?? 0);
     setLevel(night.level || 1);
     setDenial(Boolean(night.denial));
+    setPlan(night.plan_type || "full");
+    setCap(night.round_cap ?? null);
+    setRuin(night.ruin_target ?? null);
   }, [night]);
 
+  const dark = minutes === 0;
+  const machine = night?.mode !== "quiet";
+  // With no cap set, the cap follows the minutes.
+  const effectiveCap = cap ?? derivedCap(minutes);
+
   function save() {
-    const dark = minutes === 0;
     onSave({
       minutes,
       level: dark ? 0 : level,
       denial,
+      plan_type: plan,
       status: dark ? "dark" : night.status === "dark" ? "planned" : night.status,
       suction: !dark && night.mode === "machine" ? SUCTION_FOR[level] : night.suction,
+      flag: dark ? "dark" : denial ? "denial" : night.flag === "soft" ? "soft" : "finish",
+      round_cap: dark || !machine ? undefined : effectiveCap,
+      ruin_target: dark || !machine || ruin == null ? undefined : ruin,
     });
   }
 
@@ -56,6 +77,30 @@ export default function NightSheet({ night, busy, onClose, onSave, onSkip }) {
               <Segmented options={LEVEL_OPTIONS} value={level} onChange={setLevel} />
             </div>
           </div>
+
+          <div>
+            <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Plan</Label>
+            <div className="mt-2">
+              <Segmented options={PLAN_OPTIONS} value={plan} onChange={setPlan} />
+            </div>
+          </div>
+
+          {machine && !dark && (
+            <>
+              <Stepper
+                label="Cap"
+                display={`${effectiveCap} rounds`}
+                onDecrease={() => setCap(Math.max(0, effectiveCap - 1))}
+                onIncrease={() => setCap(Math.min(12, effectiveCap + 1))}
+              />
+              <Stepper
+                label="Ruin target"
+                display={ruin == null ? "none" : `round ${ruin}`}
+                onDecrease={() => setRuin((value) => (value == null || value <= 1 ? null : value - 1))}
+                onIncrease={() => setRuin((value) => Math.min(12, (value ?? 0) + 1))}
+              />
+            </>
+          )}
 
           <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
             <div>

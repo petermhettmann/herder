@@ -71,6 +71,22 @@
       ],
       "description": "Plan the night is set up on."
     },
+    "flag": {
+      "type": "string",
+      "enum": [
+        "finish",
+        "denial",
+        "dark",
+        "soft"
+      ],
+      "enumColors": [
+        "gray",
+        "purple",
+        "blue",
+        "green"
+      ],
+      "description": "The flag as the plan writes it: how the night is meant to close."
+    },
     "minutes": {
       "type": "integer",
       "minimum": 0,
@@ -89,7 +105,14 @@
     "round_cap": {
       "type": "integer",
       "minimum": 0,
+      "maximum": 12,
       "description": "Rounds the night is capped at on the machine."
+    },
+    "ruin_target": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "description": "The round the night's ruin is scheduled for, when it carries one."
     },
     "edge_target": {
       "type": "integer",

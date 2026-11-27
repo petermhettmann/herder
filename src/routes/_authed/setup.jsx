@@ -90,7 +90,8 @@ function SetupPage() {
             setBuildMin(found.minutes);
             setStretcherMin(found.minutes);
           }
-          if (found.round_cap >= 2 && found.round_cap <= 5) setRuinRound(String(found.round_cap));
+          const target = found.ruin_target ? String(found.ruin_target) : null;
+          if (target && RUIN_OPTIONS.some((option) => option.value === target)) setRuinRound(target);
         }
       })
       .catch(() => setError("That night could not be loaded."));

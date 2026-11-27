@@ -17,11 +17,13 @@ export const Route = createFileRoute("/_authed/import")({
 const MODE_OPTIONS = ["quiet", "machine"].map((value) => ({ value, label: MODE_LABEL[value] }));
 
 const PLACEHOLDER = `# Masturbation Alpha
-mode: quiet
+mode: machine
+start: 2026-12-15
 
-2026-12-15 | 20 | 1 | full | soft | opener, no glans focus
-2026-12-16 | 25 | 2 | full | finish | one held edge at 12
-2026-12-20 | 0 | 0 | full | dark | -`;
+2026-12-15 | 20 | 1 | full | soft | 4 | - | opener, no glans focus
+2026-12-16 | 25 | 2 | full | finish | 5 | - | one held edge at 12
+2026-12-19 | 45 | 3 | forced | finish | 7 | 4 | ruin on the fourth round
+2026-12-20 | 0 | 0 | full | dark | - | - | -`;
 
 function ImportPage() {
   const navigate = useNavigate();
@@ -60,7 +62,7 @@ function ImportPage() {
       const programme = await base44.entities.Programme.create({
         name: parsed.name,
         mode: parsed.mode,
-        weeks: Math.max(1, Math.ceil(parsed.nights.length / 7)),
+        weeks: parsed.weeks ?? Math.max(1, Math.ceil(parsed.nights.length / 7)),
         start_date: startDate,
         status: "active",
         source: "imported",
@@ -69,8 +71,11 @@ function ImportPage() {
       });
 
       const startMs = Date.parse(`${startDate}T12:00:00`);
+      const machine = parsed.mode === "machine";
       const rows = parsed.nights.map((night) => {
         const offset = Math.max(0, Math.round((Date.parse(`${night.date}T12:00:00`) - startMs) / 86400000));
+        const derivedCap = night.minutes > 45 ? 7 : 6;
+        const live = !night.dark;
         return {
           programme: programme.id,
           date: night.date,
@@ -80,11 +85,13 @@ function ImportPage() {
           minutes: night.minutes,
           level: night.level,
           plan_type: night.plan,
+          flag: night.flag,
           status: night.dark ? "dark" : "planned",
           denial: night.denial,
           mode: parsed.mode,
-          edge_target: night.dark ? undefined : night.minutes > 45 ? 8 : 5,
-          round_cap: night.dark || parsed.mode === "quiet" ? undefined : night.minutes > 45 ? 7 : 6,
+          edge_target: live && !machine ? (night.minutes > 45 ? 8 : 5) : undefined,
+          round_cap: live && machine ? night.round_cap ?? derivedCap : undefined,
+          ruin_target: live ? night.ruin_target : undefined,
           note: night.note,
         };
       });
