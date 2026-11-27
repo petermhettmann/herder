@@ -48,8 +48,8 @@ export default function NightSheet({ night, busy, onClose, onSave, onSkip }) {
       status: dark ? "dark" : night.status === "dark" ? "planned" : night.status,
       suction: !dark && night.mode === "machine" ? SUCTION_FOR[level] : night.suction,
       flag: dark ? "dark" : denial ? "denial" : night.flag === "soft" ? "soft" : "finish",
-      round_cap: dark || !machine ? undefined : effectiveCap,
-      ruin_target: dark || !machine || ruin == null ? undefined : ruin,
+      round_cap: dark || !machine ? null : effectiveCap,
+      ruin_target: dark || !machine || ruin == null ? null : ruin,
     });
   }
 

@@ -143,22 +143,26 @@ export default function CaptureSheet({
     setError("");
     try {
       const elapsed = Math.floor(elapsedSeconds(session.start_time) / 60);
+      const quiet = session.mode === "quiet";
       const created = await base44.entities.CheckIn.create({
         session: session.id,
         elapsed_min: elapsed,
         round: (session.rounds_total ?? 0) + 1,
         ruined: true,
         forced: true,
+        effective_severity: lastCheckIn?.effective_severity ?? 0,
         call_issued: "dead_stop",
         call_reason: "Forced ruin. Dead stop, one minute.",
         break_minutes: 1,
-        suction: lastCheckIn?.suction ?? session.start_suction ?? "very_low",
-        cycle: lastCheckIn?.cycle ?? "normal",
+        suction: quiet ? undefined : lastCheckIn?.suction ?? session.start_suction ?? "very_low",
+        cycle: quiet ? undefined : lastCheckIn?.cycle ?? "normal",
       });
       await base44.entities.Session.update(session.id, {
         status: "break",
         forced_ruin_done: true,
-        rounds_total: (session.rounds_total ?? 0) + 1,
+        ...(quiet
+          ? { edges_total: (session.edges_total ?? 0) + 1 }
+          : { rounds_total: (session.rounds_total ?? 0) + 1 }),
         breaks_total: (session.breaks_total ?? 0) + 1,
         peak_elapsed_min: Math.max(session.peak_elapsed_min ?? 0, elapsed),
         break_ends: [...(session.break_ends ?? []), new Date(Date.now() + 60000).toISOString()],

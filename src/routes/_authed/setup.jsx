@@ -67,7 +67,10 @@ function SetupPage() {
         setProtocol(active ?? null);
         const warmup = active?.plan_tables?.full?.warmup;
         if (warmup?.suction) setSuction(warmup.suction);
-        if (warmup?.end_min) setBuildMin(Number(warmup.end_min));
+        if (warmup?.end_min) {
+          setBuildMin(Number(warmup.end_min));
+          setStretcherMin(Number(warmup.end_min));
+        }
       })
       .catch(() => {});
   }, []);
@@ -88,6 +91,7 @@ function SetupPage() {
           if (found.suction) setSuction(found.suction);
           if (typeof found.minutes === "number" && found.minutes > 0) {
             setBuildMin(found.minutes);
+            setStretcherMin(found.minutes);
           }
           const target = found.ruin_target ? String(found.ruin_target) : null;
           if (target && RUIN_OPTIONS.some((option) => option.value === target)) setRuinRound(target);

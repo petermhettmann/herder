@@ -146,7 +146,14 @@ function DebriefPage() {
 
       <div className="mt-6 rounded-xl border border-border px-4 py-2">
         <Stat label="Elapsed" value={elapsed != null ? `${elapsed} min` : "—"} />
-        <Stat label="Rounds" value={session.rounds_total ?? 0} />
+        <Stat
+          label={session.mode === "quiet" ? "Edges" : "Rounds"}
+          value={
+            session.mode === "quiet"
+              ? `${session.edges_total ?? 0} edges`
+              : `${session.rounds_total ?? 0}`
+          }
+        />
         <Stat label="Breaks" value={session.breaks_total ?? 0} />
         <Stat label="Dry rounds" value={session.dry_rounds ?? 0} />
         <Stat label="Forced ruins" value={counts.forced} />
