@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
+import TonightCard from "@/components/programme/TonightCard";
 import { PLAN_LABEL, STATUS_LABEL, minutesBetween, shortDate } from "@/lib/session-utils";
 
 export const Route = createFileRoute("/_authed/")({
@@ -71,6 +72,8 @@ function HomePage() {
           </p>
         </Link>
       )}
+
+      {!open && <TonightCard />}
 
       <Button asChild className="mt-6 h-14 w-full rounded-xl text-[14px]">
         <Link to="/setup">Start a session</Link>

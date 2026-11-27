@@ -1,0 +1,112 @@
+{
+  "name": "Programme",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "What this programme is called."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "machine",
+        "quiet"
+      ],
+      "enumColors": [
+        "blue",
+        "green"
+      ],
+      "default": "machine",
+      "description": "Machine kit or quiet kit for every night it generates."
+    },
+    "weeks": {
+      "type": "integer",
+      "enum": [
+        4,
+        8,
+        12
+      ],
+      "enumColors": [
+        "blue",
+        "green",
+        "purple"
+      ],
+      "description": "How many weeks the programme runs."
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The Monday or whatever weekday the first night falls on."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "complete",
+        "abandoned"
+      ],
+      "enumColors": [
+        "gray",
+        "green",
+        "blue",
+        "red"
+      ],
+      "default": "draft",
+      "description": "Only one programme is active at a time."
+    },
+    "note": {
+      "type": "string",
+      "format": "textarea",
+      "description": "What this block of weeks is for."
+    }
+  },
+  "required": [
+    "name",
+    "mode",
+    "weeks",
+    "start_date",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

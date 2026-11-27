@@ -1,0 +1,162 @@
+{
+  "name": "Night",
+  "type": "object",
+  "properties": {
+    "programme": {
+      "type": "string",
+      "format": "relation",
+      "description": "Programme this night belongs to."
+    },
+    "week": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Week number, counted from one."
+    },
+    "day_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Day counted from the first night of the programme."
+    },
+    "weekday": {
+      "type": "string",
+      "description": "Three letter weekday, Mon to Sun."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "The night's date."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "machine",
+        "quiet"
+      ],
+      "enumColors": [
+        "blue",
+        "green"
+      ],
+      "description": "Kit this night is taken on."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "dark",
+        "done",
+        "skipped"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "green",
+        "yellow"
+      ],
+      "default": "planned",
+      "description": "Dark nights are rest days and take no session."
+    },
+    "plan_type": {
+      "type": "string",
+      "enum": [
+        "full",
+        "forced",
+        "payoff",
+        "denial"
+      ],
+      "enumColors": [
+        "blue",
+        "purple",
+        "green",
+        "pink"
+      ],
+      "description": "Plan the night is set up on."
+    },
+    "minutes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Planned minutes. Zero means a dark night."
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Level for the night, 1 to 4."
+    },
+    "suction": {
+      "type": "string",
+      "description": "Starting suction on a machine night."
+    },
+    "round_cap": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Rounds the night is capped at on the machine."
+    },
+    "edge_target": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Edges the night runs to on the quiet kit."
+    },
+    "denial": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the night ends on a denial."
+    },
+    "note": {
+      "type": "string",
+      "format": "text",
+      "description": "What the week is asking for."
+    },
+    "session": {
+      "type": "string",
+      "format": "relation",
+      "description": "The session taken on this night, once it starts."
+    }
+  },
+  "required": [
+    "programme",
+    "date",
+    "mode",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

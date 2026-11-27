@@ -23,6 +23,7 @@ import {
 
 export const Route = createFileRoute("/_authed/setup")({
   ssr: false,
+  validateSearch: (search) => ({ night: typeof search.night === "string" ? search.night : undefined }),
   head: () => ({ meta: [{ title: "Set up a session · Herder" }] }),
   component: SetupPage,
 });
@@ -40,6 +41,8 @@ const MODE_OPTIONS = ["machine", "quiet"].map((value) => ({ value, label: MODE_L
 
 function SetupPage() {
   const navigate = useNavigate();
+  const { night: nightId } = Route.useSearch();
+  const [night, setNight] = useState(null);
   const [protocol, setProtocol] = useState(null);
   const [mode, setMode] = useState("machine");
   const [intensity, setIntensity] = useState(1);
@@ -68,6 +71,30 @@ function SetupPage() {
       })
       .catch(() => {});
   }, []);
+
+  // A programmed night fills the setup in; the programme already decided mode and plan.
+  useEffect(() => {
+    if (!nightId) return;
+    base44.entities.Night.get(nightId)
+      .then((found) => {
+        if (!found) return;
+        setNight(found);
+        setMode(found.mode ?? "machine");
+        setPlanType(found.plan_type ?? "full");
+        if (found.mode === "quiet") {
+          if (found.level) setIntensity(found.level);
+          if (found.edge_target) setTargetEdges(found.edge_target);
+        } else {
+          if (found.suction) setSuction(found.suction);
+          if (typeof found.minutes === "number") {
+            setBuildMin(found.minutes);
+            setStretcherMin(found.minutes);
+          }
+          if (found.round_cap >= 2 && found.round_cap <= 5) setRuinRound(String(found.round_cap));
+        }
+      })
+      .catch(() => setError("That night could not be loaded."));
+  }, [nightId]);
 
   // The kit is pre-ticked from the protocol and starts again whenever the plan changes.
   useEffect(() => {
@@ -126,6 +153,9 @@ function SetupPage() {
         peak_elapsed_min: 0,
         briefing: briefing || undefined,
       });
+      if (night) {
+        await base44.entities.Night.update(night.id, { session: created.id, status: "done" });
+      }
       navigate({
         to: quiet ? "/live/$sessionId/quiet" : planType === "denial" ? "/live/$sessionId/denial" : "/live/$sessionId",
         params: { sessionId: created.id },
@@ -143,18 +173,35 @@ function SetupPage() {
         Set the session up.
       </h1>
 
+      {night && (
+        <div className="mt-6 rounded-xl border border-border p-4">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            Programme night · week {night.week} · {night.weekday}
+          </p>
+          {night.denial && <p className="mt-1 text-[11px] text-call-caution">Ends on a denial.</p>}
+          {night.note && (
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{night.note}</p>
+          )}
+        </div>
+      )}
+
       <div className="mt-7 space-y-6">
         <div>
           <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Mode</Label>
           <div className="mt-2">
-            <Segmented options={MODE_OPTIONS} value={mode} onChange={setMode} />
+            <Segmented options={MODE_OPTIONS} value={mode} onChange={setMode} disabled={Boolean(night)} />
           </div>
         </div>
 
         <div>
           <Label className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Plan type</Label>
           <div className="mt-2">
-            <Segmented options={PLAN_OPTIONS} value={planType} onChange={setPlanType} />
+            <Segmented
+              options={PLAN_OPTIONS}
+              value={planType}
+              onChange={setPlanType}
+              disabled={Boolean(night)}
+            />
           </div>
         </div>
 
