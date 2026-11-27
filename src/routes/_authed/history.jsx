@@ -70,7 +70,9 @@ function HistoryPage() {
                     <p className="text-[13px] font-medium">{shortDate(session.start_time)}</p>
                     <p className="tnum mt-1 text-[11px] text-muted-foreground">
                       {PLAN_LABEL[session.plan_type]} · {STATUS_LABEL[session.status]} ·{" "}
-                      {session.rounds_total ?? 0} rounds
+                      {session.mode === "quiet"
+                        ? `${session.edges_total ?? 0} edges`
+                        : `${session.rounds_total ?? 0} rounds`}
                       {duration != null ? ` · ${duration} min` : ""}
                     </p>
                   </div>

@@ -118,7 +118,12 @@ function SetupPage() {
       );
       if (open) {
         navigate({
-          to: open.mode === "quiet" ? "/live/$sessionId/quiet" : "/live/$sessionId",
+          to:
+            open.mode === "quiet"
+              ? "/live/$sessionId/quiet"
+              : open.plan_type === "denial"
+                ? "/live/$sessionId/denial"
+                : "/live/$sessionId",
           params: { sessionId: open.id },
         });
         return;
@@ -185,7 +190,7 @@ function SetupPage() {
         Set the session up.
       </h1>
 
-      {!nightId && (
+      {!night && (
         <p className="mt-2 text-[12px] text-muted-foreground">Free session, nothing scheduled.</p>
       )}
 

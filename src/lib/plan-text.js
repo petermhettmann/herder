@@ -246,6 +246,10 @@ export function parsePlan(text) {
 
   const ordered = [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 
+  if (weeks && weeks !== Math.ceil(ordered.length / 7)) {
+    errors.push({ at: 1, reason: `weeks says ${weeks} but there are ${ordered.length} nights` });
+  }
+
   if (start && ordered.length) {
     const limit = iso(addDays(start, MAX_DAYS));
     const far = ordered.filter((night) => night.date > limit);

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authed/import")({
 const MODE_OPTIONS = ["quiet", "machine"].map((value) => ({ value, label: MODE_LABEL[value] }));
 
 const PLACEHOLDER = `# Masturbation Alpha
-mode: machine
+mode: quiet
 start: 2026-12-15
 
 2026-12-15 | 20 | 1 | full | soft | 4 | - | opener, no glans focus
@@ -62,7 +62,7 @@ function ImportPage() {
       const programme = await base44.entities.Programme.create({
         name: parsed.name,
         mode: parsed.mode,
-        weeks: parsed.weeks ?? Math.max(1, Math.ceil(parsed.nights.length / 7)),
+        weeks: Math.max(1, Math.ceil(parsed.nights.length / 7)),
         start_date: startDate,
         status: "active",
         source: "imported",

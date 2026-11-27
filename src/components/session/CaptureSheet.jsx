@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import BurstCamera from "@/components/session/BurstCamera";
 import Stepper from "@/components/session/Stepper";
@@ -46,6 +47,7 @@ export default function CaptureSheet({
   const [cycle, setCycle] = useState("normal");
   const [toys, setToys] = useState([]);
   const [felt, setFelt] = useState("");
+  const [isDry, setIsDry] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -54,6 +56,7 @@ export default function CaptureSheet({
     setCondition("");
     setCloseness(5);
     setFelt("");
+    setIsDry(false);
     setError("");
     setSuction(lastCheckIn?.suction ?? session?.start_suction ?? "very_low");
     setCycle(lastCheckIn?.cycle ?? "normal");
@@ -102,7 +105,7 @@ export default function CaptureSheet({
         toys_active: toys,
         photo_burst: photos,
         felt_text: felt || undefined,
-        is_dry: false,
+        is_dry: isDry,
       });
 
       try {
@@ -127,13 +130,12 @@ export default function CaptureSheet({
     }
   }
 
-  // The ruin can be taken inside the ninety second window a round leaves open.
+  // The ruin can be taken inside the ninety second window a round leaves open, or from its target round on.
   const ruinAnchor = lastCheckIn ? Date.parse(lastCheckIn.created_date) : Date.parse(session?.start_time ?? "");
-  const ruinOpen =
-    Boolean(session) &&
-    !session.forced_ruin_done &&
-    Number.isFinite(ruinAnchor) &&
-    now - ruinAnchor <= 90000;
+  const inWindow = Number.isFinite(ruinAnchor) && now - ruinAnchor <= 90000;
+  const atTarget =
+    session?.ruin_target_round != null && (session.rounds_total ?? 0) + 1 >= session.ruin_target_round;
+  const ruinOpen = Boolean(session) && !session.forced_ruin_done && (inWindow || atTarget);
 
   async function ruin() {
     if (!session || !ruinOpen || busy) return;
@@ -254,6 +256,13 @@ export default function CaptureSheet({
             className="rounded-xl"
           />
           <VoiceNote onTranscript={(text) => setFelt((previous) => (previous ? `${previous} ${text}` : text))} />
+        </div>
+
+        <div className="mt-6 flex items-center justify-between rounded-xl border border-border p-4">
+          <Label htmlFor="dry-round" className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            Dry round
+          </Label>
+          <Switch id="dry-round" checked={isDry} onCheckedChange={setIsDry} />
         </div>
 
         {error && <p className="mt-4 text-[11px] text-call-stop">{error}</p>}
